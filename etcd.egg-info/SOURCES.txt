@@ -1,0 +1,9 @@
+setup.cfg
+setup.py
+etcd/__init__.py
+etcd.egg-info/PKG-INFO
+etcd.egg-info/SOURCES.txt
+etcd.egg-info/dependency_links.txt
+etcd.egg-info/entry_points.txt
+etcd.egg-info/not-zip-safe
+etcd.egg-info/top_level.txt

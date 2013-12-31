@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: etcd
+Version: 0.1.0dev
+Summary: A Python etcd client that just works.
+Home-page: UNKNOWN
+Author: Dustin Oprea
+Author-email: myselfasunder@gmail.com
+License: GPL 2
+Description: A Python etcd client that just works.
+Keywords: etcd
+Platform: UNKNOWN
