@@ -5,6 +5,7 @@ from etcd.exceptions import EtcdHttpNotFoundException
 from etcd.directory_ops import DirectoryOps
 from etcd.file_ops import FileOps
 from etcd.server_ops import ServerOps
+from etcd.lock_ops import LockOps
 from etcd.response import ResponseV2
 
 # TODO: Add support for SSL: 
@@ -24,7 +25,7 @@ class Client(object):
         if self.__version.startswith('0.2') is False:
             raise ValueError("We don't support an etcd version older than 0.2.0 .")
 
-    def send(self, version, verb, path, value=None, parameters={}):
+    def send(self, version, verb, path, value=None, parameters={}, data={}, module=None, return_raw=False):
         if version != 2:
             raise ValueError("We were told to send a version (%d) request, "
                              "which is not supported." % (version))
@@ -32,14 +33,21 @@ class Client(object):
             response_cls = ResponseV2
 
         send = getattr(requests, verb)
-        url = ('%s/v%d/%s' % (self.__prefix, version, path))
 
-        args = { 'params': parameters }
+        if module is None:
+            url = ('%s/v%d%s' % (self.__prefix, version, path))
+        else:
+            url = ('%s/mod/v%d/%s%s' % (self.__prefix, version, module, path))
+
+        args = { 'params': parameters, 'data': data }
         if value is not None:
-            args['data'] = { 'value': value }
+            args['data']['value'] = value
 
         r = send(url, **args)
         r.raise_for_status()
+
+        if return_raw is True:
+            return r
 
         return response_cls(r, verb, path)
 
@@ -70,3 +78,11 @@ class Client(object):
         except AttributeError:
             self.__server = ServerOps(self)
             return self.__server
+
+    @property
+    def lock(self):
+        try:
+            return self.__lock
+        except AttributeError:
+            self.__lock = LockOps(self)
+            return self.__lock
