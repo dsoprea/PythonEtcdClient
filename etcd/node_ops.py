@@ -10,11 +10,16 @@ class NodeOps(CommonOps):
     def __init__(self, client):
         self.__client = client
 
-    def get(self, path):
+    def get(self, path, recursive=False):
         fq_path = self.get_fq_node_path(path)
 
+        parameters = { }
+
+        if recursive is True:
+            parameters['recursive'] = 'true'
+
         try:
-            return self.__client.send(2, 'get', fq_path)
+            return self.__client.send(2, 'get', fq_path, parameters=parameters)
         except HTTPError as e:
             if e.response.status_code == codes.not_found:
                 raise KeyError(path)

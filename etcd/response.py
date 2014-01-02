@@ -17,19 +17,15 @@ def _build_node_object(action, node):
         node['dir'] = False
 
     if node['dir'] == True:
-        if action == A_GET:
-            return ResponseV2DirectoryCollection(action, node)
-        elif action == A_SET:
-            return ResponseV2AliveDirectoryNode(action, node)
-        elif action == A_DELETE:
+        if action == A_DELETE:
             return ResponseV2DeletedDirectoryNode(action, node)
-# TODO: What other types of actions can happen for a DIRECTORY?
+# TODO: Specifically, what actions can happen for a DIRECTORY?
         else:
-            raise ValueError("Unrecognized directory response 'action': %s" % (action))
+            return ResponseV2AliveDirectoryNode(action, node)
     else:
         if action == A_DELETE:
             return ResponseV2DeletedNode(action, node)
-# TODO: What other types of actions can happen for a non-directory node?
+# TODO: Specifically, what actions can happen for a non-directory?
         else:
             return ResponseV2AliveNode(action, node)
 
@@ -45,6 +41,30 @@ class ResponseV2BasicNode(object):
         self.key = node['key']
         self.is_hidden = basename(node['key']).startswith('_')
 
+        # >> Process TTL stuff. 
+
+        try:
+            expiration = node['expiration']
+        except KeyError:
+            self.expiration = None
+            self.ttl = None
+            self.ttl_phrase = 'None'
+        else:
+            self.ttl = node['ttl']
+
+            first_part = expiration[:19]
+            naive_dt = datetime.strptime(first_part, '%Y-%m-%dT%H:%M:%S')
+            tz_offset_hours = int(expiration[-5:-3])
+            tz_offset_minutes = int(expiration[-2:])
+
+            tz_offset = timedelta(seconds=(tz_offset_hours * 60 * 60 + 
+                                           tz_offset_minutes * 60))
+
+            self.expiration = (naive_dt + tz_offset).replace(tzinfo=pytz.UTC)
+            self.ttl_phrase = ('%d: %s' % (self.ttl, self.expiration))
+
+        # <<
+
         try:
             self.initialize(node)
         except NotImplementedError:
@@ -55,10 +75,11 @@ class ResponseV2BasicNode(object):
 
     def __repr__(self):
         return ('<NODE(%s) [%s] [%s] IS_HID=[%s] IS_DEL=[%s] IS_DIR=[%s] '
-                'IS_COLL=[%s] CI=(%d) MI=(%d)>' % 
+                'IS_COLL=[%s] TTL=[%s] CI=(%d) MI=(%d)>' % 
                 (self.__class__.__name__, self.action, self.key, 
                  self.is_hidden, self.is_deleted, self.is_directory, 
-                 self.is_collection, self.created_index, self.modified_index))
+                 self.is_collection, self.ttl_phrase, self.created_index, 
+                 self.modified_index))
 
     @property
     def is_deleted(self):
@@ -76,39 +97,7 @@ class ResponseV2BasicNode(object):
 class ResponseV2AliveNode(ResponseV2BasicNode):
     "Base-class representing a single, non-deleted node."
 
-    def __repr__(self):
-        if self.ttl is None:
-            ttl_phrase = 'None'
-        else:
-            ttl_phrase = ('%d: %s' % (self.ttl, self.expiration))
-
-        return ('<NODE(%s) [%s] [%s] IS_HID=[%s] IS_DEL=[%s] IS_DIR=[%s] '
-                'IS_COLL=[%s] CI=(%d) MI=(%d) TTL=[%s]>' % 
-                (self.__class__.__name__, self.action, self.key, 
-                 self.is_hidden, self.is_deleted, self.is_directory, 
-                 self.is_collection, self.created_index, self.modified_index, 
-                 ttl_phrase))
-
     def initialize(self, node):
-        try:
-            expiration = node['expiration']
-        except KeyError:
-            self.expiration = None
-        else:
-            first_part = expiration[:19]
-            naive_dt = datetime.strptime(first_part, '%Y-%m-%dT%H:%M:%S')
-            tz_offset_hours = int(expiration[-5:-3])
-            tz_offset_minutes = int(expiration[-2:])
-
-            tz_offset = timedelta(seconds=(tz_offset_hours * 60 * 60 + 
-                                           tz_offset_minutes * 60))
-
-            self.expiration = (naive_dt + tz_offset).replace(tzinfo=pytz.UTC)
-        try:
-            self.ttl = node['ttl']
-        except KeyError:
-            self.ttl = None
-
         self.value = node['value']
 
 
@@ -135,6 +124,39 @@ class ResponseV2AliveDirectoryNode(ResponseV2DirectoryNode):
     among siblings.
     """
 
+    def initialize(self, node):
+        if 'nodes' in node:
+            self.__is_collection = True
+            self.__raw_nodes = node['nodes']
+        else:
+            self.__is_collection = False
+            self.__raw_nodes = None
+
+    def __repr__(self):
+        node_count_phrase = (len(self.__raw_nodes) \
+                                if self.__raw_nodes is not None \
+                                else '<NA>')
+
+        return ('<NODE(%s) [%s] [%s] IS_HID=[%s] TTL=[%s] IS_DIR=[%s] '
+                'IS_COLL=[%s] COUNT=[%s] CI=(%d) MI=(%d)>' % 
+                (self.__class__.__name__, self.action, self.key, 
+                 self.is_hidden, self.ttl_phrase, self.is_directory,
+                 self.__is_collection, node_count_phrase, 
+                 self.created_index, self.modified_index))
+
+    @property
+    def is_collection(self):
+        return self.__is_collection
+
+    @property
+    def children(self):
+        if self.__is_collection is False:
+            raise ValueError("This directory node is not a collection.")
+
+# TODO: This will need to cache the new objects for the benefit of repeated enumerations.
+        for node in self.__raw_nodes:
+            yield _build_node_object(self.action, node)
+
 
 class ResponseV2DeletedDirectoryNode(ResponseV2DirectoryNode):
     """Represents a single DIRECTORY node either appearing in isolation or
@@ -144,33 +166,6 @@ class ResponseV2DeletedDirectoryNode(ResponseV2DirectoryNode):
     @property
     def is_deleted(self):
         return True
-
-
-class ResponseV2DirectoryCollection(ResponseV2AliveDirectoryNode):
-    "Represents the list of nodes when a directory is returned."
-
-    def initialize(self, node):
-        self.__raw_nodes = node['nodes']
-
-    def __repr__(self):
-        return ('<NODE(%s) [%s] [%s] IS_HID=[%s] COUNT=(%d) CI=(%d) MI=(%d)>' % 
-                (self.__class__.__name__, self.action, self.key, 
-                 self.is_hidden, len(self.__raw_nodes), self.created_index, 
-                 self.modified_index))
-
-    @property
-    def is_directory(self):
-        return True
-
-    @property
-    def is_collection(self):
-        return True
-
-    @property
-    def children(self):
-# TODO: This will need to cache the new objects for the benefit of repeated enumerations.
-        for node in self.__raw_nodes:
-            yield _build_node_object(self.action, node)
 
 
 class ResponseV2(object):

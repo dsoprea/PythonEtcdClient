@@ -68,7 +68,7 @@ class Client(object):
 
         r = send(url, **args)
         r.raise_for_status()
-        print(r.json())
+
         if return_raw is True:
             return r
 
