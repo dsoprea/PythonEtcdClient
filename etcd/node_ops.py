@@ -76,17 +76,17 @@ class NodeOps(CommonOps):
             raise
 
     def create_only(self, path, value, ttl=None):
-# This will have a return "action" of "create".
+        # This will have a return "action" of "create".
         return self.compare_and_swap(path, value, prev_exists=False, ttl=ttl)
 
     def update_only(self, path, value, ttl=None):
-# This will have a return "action" of "update".
+        # This will have a return "action" of "update".
         return self.compare_and_swap(path, value, prev_exists=True, ttl=ttl)
 
     def update_if_index(self, path, value, current_index, ttl=None):
-# This will have a return "action" of "compareAndSwap".
+        # This will have a return "action" of "compareAndSwap".
         return self.compare_and_swap(path, value, current_index=current_index, ttl=ttl)
 
     def update_if_value(self, path, value, current_value, ttl=None):
-# This will have a return "action" of "compareAndSwap".
+        # This will have a return "action" of "compareAndSwap".
         return self.compare_and_swap(path, value, current_value=current_value, ttl=ttl)

@@ -47,15 +47,16 @@ class _LockBase(object):
 class _Lock(_LockBase):
     """This lock will seek acquire an exclusive lock every time."""
 
-    def __init__(self, client, lock_name):
+    def __init__(self, client, lock_name, ttl_s):
         super(_Lock, self).__init__(client, lock_name)
 
         self.__index = None
+        self.__ttl_s = ttl_s
 
-    def acquire(self, ttl_s):
+    def acquire(self):
         self.client.debug("Acquiring lock: %s" % (self.path))
 
-        parameters = { 'ttl': ttl_s }
+        parameters = { 'ttl': self.__ttl_s }
 
         try:
           r = self.client.send(2, 
@@ -153,16 +154,17 @@ class _ReentrantLock(_LockBase):
     anything with the same instance-value.
     """
 
-    def __init__(self, client, lock_name, instance_value):
+    def __init__(self, client, lock_name, instance_value, ttl_s):
         super(_ReentrantLock, self).__init__(client, lock_name)
 
         self.__instance_value = instance_value
+        self.__ttl_s = ttl_s
 
-    def acquire(self, ttl_s):
+    def acquire(self):
         self.client.debug("Acquiring rlock [%s]: %s" % 
                           (self.__instance_value, self.path))
 
-        parameters = { 'ttl': ttl_s }
+        parameters = { 'ttl': self.__ttl_s }
 
         try:
           self.client.send(2, 
@@ -252,8 +254,8 @@ class LockMod(CommonOps):
     def __init__(self, client):
         self.__client = client
 
-    def get_lock(self, lock_name):
-        return _Lock(self.__client, lock_name)
+    def get_lock(self, lock_name, ttl_s):
+        return _Lock(self.__client, lock_name, ttl_s)
 
-    def get_rlock(self, lock_name, instance_value):
-        return _ReentrantLock(self.__client, lock_name, instance_value)
+    def get_rlock(self, lock_name, instance_value, ttl_s):
+        return _ReentrantLock(self.__client, lock_name, instance_value, ttl_s)

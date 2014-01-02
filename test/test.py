@@ -19,8 +19,14 @@ print
 #l.acquire(10)
 #l.renew(150)
 #l.release()
-#
-#exit(0)
+
+#with c.module.lock.get_lock('test_lock_2', 10):
+#    print("In lock.")
+
+#with c.module.lock.get_rlock('test_lock_2', 'host1', 10):
+#    print("In lock 2.")
+
+exit(0)
 
 #key = 'abc'
 #value = 'some_value'

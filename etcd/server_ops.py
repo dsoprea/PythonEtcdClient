@@ -25,10 +25,12 @@ class ServerOps(CommonOps):
         version_string = self.__get_get_text('version', '/version', version=None)
 
         # Version should look like "etcd v0.2.0".
-        if version_string.startswith('etcd v') is False:
+        prefix = 'etcd v'
+
+        if version_string.startswith(prefix) is False:
             raise ValueError("Could not parse server version: %s" % (r.text))
 
-        return version_string[6:]
+        return version_string[len(prefix):]
 
     def get_leader_url_prefix(self):
         return self.__get_get_text('leader', '/leader')
