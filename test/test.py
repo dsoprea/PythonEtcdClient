@@ -15,12 +15,20 @@ print
 #
 #exit(0)
 
-l = c.module.lock.get_lock('test_lock_2')
-l.acquire(10)
-l.renew(150)
-l.release()
+#l = c.module.lock.get_lock('test_lock_2')
+#l.acquire(10)
+#l.renew(150)
+#l.release()
+#
+#exit(0)
 
-exit(0)
+#key = 'abc'
+#value = 'some_value'
+#c.module.leader.set_or_renew(key, value, 10)
+#c.module.leader.get(key)
+#c.module.leader.delete(key, value)
+#
+#exit(0)
 
 # TODO: Is a lock deleted implicitly after expiration, or is it just somehow deactivated? I tried one key with the index lock, and I subsequently used the same key for a value lock, and I got a 500.
 

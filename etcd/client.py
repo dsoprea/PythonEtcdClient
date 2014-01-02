@@ -7,6 +7,7 @@ from etcd.directory_ops import DirectoryOps
 from etcd.node_ops import NodeOps
 from etcd.server_ops import ServerOps
 from etcd.modules.lock import LockMod
+from etcd.modules.leader import LeaderMod
 from etcd.response import ResponseV2
 
 # TODO: Add support for SSL: 
@@ -24,6 +25,14 @@ class _Modules(object):
         except AttributeError:
             self.__lock = LockMod(self.__client)
             return self.__lock
+
+    @property
+    def leader(self):
+        try:
+            return self.__leader
+        except AttributeError:
+            self.__leader = LeaderMod(self.__client)
+            return self.__leader
 
 
 class Client(object):
