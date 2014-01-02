@@ -1,5 +1,9 @@
+import pytz
+
 from collections import namedtuple
 from os.path import basename
+from pytz import timezone
+from datetime import datetime, timedelta
 
 A_GET = 'get'
 A_SET = 'set'
@@ -9,20 +13,20 @@ A_CAS = 'compareAndSwap'
 
 def _build_node_object(action, node):
     if 'dir' not in node:
-        node['dir'] = 'false'
+        node['dir'] = False
 
-    if node['dir'] == 'true':
-        if self.action == A_GET:
-            return ResponseV2NodeCollection(self.action, node)
-        elif self.action in A_SET:
-            return ResponseV2DirectoryAliveNode(self.action, node)
-        elif self.action in A_DELETE:
-            return ResponseV2DirectoryDeletedNode(self.action, node)
+    if node['dir'] == True:
+        if action == A_GET:
+            return ResponseV2DirectoryCollection(action, node)
+        elif action == A_SET:
+            return ResponseV2AliveDirectoryNode(action, node)
+        elif action == A_DELETE:
+            return ResponseV2DeletedDirectoryNode(action, node)
     else:
-        if self.action == A_DELETE:
-            return ResponseV2DeletedNode(self.action, node)
+        if action == A_DELETE:
+            return ResponseV2DeletedNode(action, node)
         else:
-            return ResponseV2FullNode(self.action, node)
+            return ResponseV2AliveNode(action, node)
 
 
 class ResponseV2BasicNode(object):
@@ -30,6 +34,7 @@ class ResponseV2BasicNode(object):
 
     def __init__(self, action, node):
         self.action = action
+        self.raw_node = node
         self.created_index = node['createdIndex']
         self.modified_index = node['modifiedIndex']
         self.key = node['key']
@@ -43,6 +48,13 @@ class ResponseV2BasicNode(object):
     def initialize(self, node):
         raise NotImplementedError()
 
+    def __repr__(self):
+        return ('<NODE(%s) [%s] [%s] IS_HID=[%s] IS_DEL=[%s] IS_DIR=[%s] '
+                'IS_COLL=[%s] CI=(%d) MI=(%d)>' % 
+                (self.__class__.__name__, self.action, self.key, 
+                 self.is_hidden, self.is_deleted, self.is_directory, 
+                 self.is_collection, self.created_index, self.modified_index))
+
     @property
     def is_deleted(self):
         return False
@@ -56,21 +68,43 @@ class ResponseV2BasicNode(object):
         return False
 
 
-class ResponseV2AliveNode(object):
+class ResponseV2AliveNode(ResponseV2BasicNode):
     "Base-class representing a single, non-deleted node."
 
-    def __init__(self, action, node):
+    def __repr__(self):
+        if self.ttl is None:
+            ttl_phrase = 'None'
+        else:
+            ttl_phrase = ('%d: %s' % (self.ttl, self.expiration))
+
+        return ('<NODE(%s) [%s] [%s] IS_HID=[%s] IS_DEL=[%s] IS_DIR=[%s] '
+                'IS_COLL=[%s] CI=(%d) MI=(%d) TTL=[%s]>' % 
+                (self.__class__.__name__, self.action, self.key, 
+                 self.is_hidden, self.is_deleted, self.is_directory, 
+                 self.is_collection, self.created_index, self.modified_index, 
+                 ttl_phrase))
+
+    def initialize(self, node):
         try:
-            self.expiration = node['expiration']
+            expiration = node['expiration']
         except KeyError:
             self.expiration = None
+        else:
+            first_part = expiration[:19]
+            naive_dt = datetime.strptime(first_part, '%Y-%m-%dT%H:%M:%S')
+            tz_offset_hours = int(expiration[-5:-3])
+            tz_offset_minutes = int(expiration[-2:])
 
+            tz_offset = timedelta(seconds=(tz_offset_hours * 60 * 60 + 
+                                           tz_offset_minutes * 60))
+
+            self.expiration = (naive_dt + tz_offset).replace(tzinfo=pytz.UTC)
         try:
             self.ttl = node['ttl']
         except KeyError:
             self.ttl = None
 
-        super(ResponseV2Node, self).__init__(action, node)
+        self.value = node['value']
 
 
 class ResponseV2DeletedNode(ResponseV2BasicNode):
@@ -79,15 +113,6 @@ class ResponseV2DeletedNode(ResponseV2BasicNode):
     @property
     def is_deleted(self):
         return True
-
-
-class ResponseV2FullNode(ResponseV2AliveNode):
-    """Represents a single FILE node either appearing in isolation or among 
-    siblings.
-    """
-
-    def initialize(self, node):
-        self.value = node['value']
 
 
 class ResponseV2DirectoryNode(ResponseV2BasicNode):
@@ -100,13 +125,13 @@ class ResponseV2DirectoryNode(ResponseV2BasicNode):
         return True
 
 
-class ResponseV2DirectoryAliveNode(ResponseV2DirectoryNode):
+class ResponseV2AliveDirectoryNode(ResponseV2DirectoryNode):
     """Represents a single DIRECTORY node either appearing in isolation or
     among siblings.
     """
 
 
-class ResponseV2DirectoryDeletedNode(ResponseV2DirectoryNode):
+class ResponseV2DeletedDirectoryNode(ResponseV2DirectoryNode):
     """Represents a single DIRECTORY node either appearing in isolation or
     among siblings.
     """
@@ -116,11 +141,17 @@ class ResponseV2DirectoryDeletedNode(ResponseV2DirectoryNode):
         return True
 
 
-class ResponseV2NodeCollection(ResponseV2AliveNode):
+class ResponseV2DirectoryCollection(ResponseV2AliveDirectoryNode):
     "Represents the list of nodes when a directory is returned."
 
     def initialize(self, node):
         self.__raw_nodes = node['nodes']
+
+    def __repr__(self):
+        return ('<NODE(%s) [%s] [%s] IS_HID=[%s] COUNT=(%d) CI=(%d) MI=(%d)>' % 
+                (self.__class__.__name__, self.action, self.key, 
+                 self.is_hidden, len(self.__raw_nodes), self.created_index, 
+                 self.modified_index))
 
     @property
     def is_directory(self):
@@ -134,7 +165,7 @@ class ResponseV2NodeCollection(ResponseV2AliveNode):
     def children(self):
 # TODO: This will need to cache the new objects for the benefit of repeated enumerations.
         for node in self.__raw_nodes:
-            yield _build_node_object(node)
+            yield _build_node_object(self.action, node)
 
 
 class ResponseV2(object):
@@ -142,7 +173,10 @@ class ResponseV2(object):
 
     def __init__(self, response, request_verb, request_path):
         response_raw = response.json()
-        node_raw = response_raw['node']
-        self.node = _build_node_object(node_raw)
+        self.node = _build_node_object(response_raw['action'], 
+                                       response_raw['node'])
+
+    def __repr__(self):
+        return ('<RESPONSE: %s>' % (self.node))
 
 # TODO: We need to handle the "TTL" expired response. Does this happen on a GET?

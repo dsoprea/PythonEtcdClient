@@ -130,7 +130,7 @@ class _ReentrantLock(_LockBase):
                            value=self.__instance_value,
                            return_raw=True)
 
-    def get_active_value(self)
+    def get_active_value(self):
         r = self.__client.send(2, 
                                'get', 
                                self.path, 

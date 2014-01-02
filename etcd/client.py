@@ -1,9 +1,10 @@
 import requests
 
+from os import environ
+
 from etcd.config import DEFAULT_HOSTNAME, DEFAULT_PORT, DEFAULT_SCHEME
-from etcd.exceptions import EtcdHttpNotFoundException
 from etcd.directory_ops import DirectoryOps
-from etcd.file_ops import FileOps
+from etcd.node_ops import NodeOps
 from etcd.server_ops import ServerOps
 from etcd.lock_ops import LockOps
 from etcd.response import ResponseV2
@@ -12,24 +13,42 @@ from etcd.response import ResponseV2
 #   curl --key ./fixtures/ca/server2.key.insecure --cert ./fixtures/ca/server2.crt --cacert ./fixtures/ca/server-chain.pem -L https://127.0.0.1:4001/v2/keys/foo -XPUT -d value=bar -v
 
 
-
 class Client(object):
-    def __init__(self, hostname=DEFAULT_HOSTNAME, port=DEFAULT_PORT, scheme=DEFAULT_SCHEME):
+    def __init__(self, hostname=DEFAULT_HOSTNAME, port=DEFAULT_PORT, scheme=DEFAULT_SCHEME, debug=False):
+        debug_override = environ.get('ETCD_DEBUG')
+        if debug_override is not None and debug_override == 'true':
+            debug = True
+
+        self.__debug = debug
+
         self.__hostname = hostname
         self.__port = port
         self.__scheme = scheme
 
         self.__prefix = ('%s://%s:%s' % (scheme, hostname, port))
-        self.__version = self.__get_server_version()
+        self.debug("PREFIX= [%s]" % (self.__prefix))
+
+        self.__version = self.server.get_server_version()
+        self.debug("Version: %s" % (self.__version))
 
         if self.__version.startswith('0.2') is False:
             raise ValueError("We don't support an etcd version older than 0.2.0 .")
 
-    def send(self, version, verb, path, value=None, parameters={}, data={}, module=None, return_raw=False):
+    def debug(self, message):
+        if self.__debug is True:
+            print("EC: %s" % (message))
+
+    def send(self, version, verb, path, value=None, parameters=None, data=None, module=None, return_raw=False):
+        if parameters is None:
+            parameters = {}
+
+        if data is None:
+            data = {}
+
         if version != 2:
             raise ValueError("We were told to send a version (%d) request, "
                              "which is not supported." % (version))
-        else
+        else:
             response_cls = ResponseV2
 
         send = getattr(requests, verb)
@@ -39,13 +58,16 @@ class Client(object):
         else:
             url = ('%s/mod/v%d/%s%s' % (self.__prefix, version, module, path))
 
-        args = { 'params': parameters, 'data': data }
         if value is not None:
-            args['data']['value'] = value
+            data['value'] = value
+
+        args = { 'params': parameters, 'data': data }
+
+        self.debug("Request=[%s] params=[%s] data_keys=[%s]" % (url, parameters, args['data'].keys()))
 
         r = send(url, **args)
         r.raise_for_status()
-
+        print(r.json())
         if return_raw is True:
             return r
 
@@ -64,12 +86,12 @@ class Client(object):
             return self.__directory
 
     @property
-    def file(self):
+    def node(self):
         try:
-            return self.__file
+            return self.__node
         except AttributeError:
-            self.__file = FileOps(self)
-            return self.__file
+            self.__node = NodeOps(self)
+            return self.__node
 
     @property
     def server(self):
