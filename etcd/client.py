@@ -28,7 +28,9 @@ class Client(object):
         self.__prefix = ('%s://%s:%s' % (scheme, hostname, port))
         self.debug("PREFIX= [%s]" % (self.__prefix))
 
-        self.__version = self.server.get_server_version()
+# TODO: Remove the version check after debugging.
+# TODO: Can we implicitly read the version from the response/headers?
+        self.__version = self.server.get_version()
         self.debug("Version: %s" % (self.__version))
 
         if self.__version.startswith('0.2') is False:

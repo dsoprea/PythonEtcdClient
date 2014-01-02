@@ -6,6 +6,11 @@ class DirectoryOps(CommonOps):
         self.__client = client
 
     def create(self, path, ttl=None):
+        """A normal node-set will implicitly create directories on the way to 
+        setting a value. This call exists for when you'd like to -explicitly- 
+        create one.
+        """
+
         fq_path = self.get_fq_node_path(path)
         data = { 'dir': 'true' }
 

@@ -6,6 +6,15 @@ c = Client()
 
 print
 
+#print(c.server.get_version())
+#print(c.server.get_leader_url_prefix())
+#for machine in c.server.get_machines().node.children:
+#    print(machine.value)
+
+print(c.server.get_dashboard_url())
+
+exit(0)
+
 #r = c.node.set('/test_2056/val1', 5, ttl=60)
 #print(r)
 

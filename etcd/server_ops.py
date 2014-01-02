@@ -21,7 +21,7 @@ class ServerOps(CommonOps):
 
         return r.text
 
-    def get_server_version(self):
+    def get_version(self):
         version_string = self.__get_get_text('version', '/version', version=None)
 
         # Version should look like "etcd v0.2.0".
@@ -34,13 +34,10 @@ class ServerOps(CommonOps):
         return self.__get_get_text('leader', '/leader')
 
     def get_machines(self):
-        path = '/keys/_etcd/machines'
-        verb = 'get'
-        r = self.__client.send(2, verb, path)
-
-        return ResponseV2(r, verb, path)
+        fq_path = self.get_fq_node_path('/_etcd/machines')
+        return self.__client.send(2, 'get', fq_path)
 
     def get_dashboard_url(self):
-        return (self.__client.prefix + '/mod/dashboard/')
+        return (self.__client.prefix + '/mod/dashboard')
 
 # TODO: Add methods for modules: locking, leader election
