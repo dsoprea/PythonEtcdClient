@@ -12,3 +12,6 @@ class EtcdException(Exception):
 #
 #class EtcdHttpNotFoundException(EtcdHttpException):
 #    pass
+
+class EtcdPreconditionException(EtcdException):
+    pass

@@ -63,7 +63,8 @@ class Client(object):
 
         args = { 'params': parameters, 'data': data }
 
-        self.debug("Request=[%s] params=[%s] data_keys=[%s]" % (url, parameters, args['data'].keys()))
+        self.debug("Request(%s)=[%s] params=[%s] data_keys=[%s]" % 
+                   (verb, url, parameters, args['data'].keys()))
 
         r = send(url, **args)
         r.raise_for_status()

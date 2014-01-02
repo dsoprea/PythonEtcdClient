@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 A_GET = 'get'
 A_SET = 'set'
+A_UPDATE = 'update'
 A_CREATE = 'create'
 A_DELETE = 'delete'
 A_CAS = 'compareAndSwap'
@@ -22,9 +23,13 @@ def _build_node_object(action, node):
             return ResponseV2AliveDirectoryNode(action, node)
         elif action == A_DELETE:
             return ResponseV2DeletedDirectoryNode(action, node)
+# TODO: What other types of actions can happen for a DIRECTORY?
+        else:
+            raise ValueError("Unrecognized directory response 'action': %s" % (action))
     else:
         if action == A_DELETE:
             return ResponseV2DeletedNode(action, node)
+# TODO: What other types of actions can happen for a non-directory node?
         else:
             return ResponseV2AliveNode(action, node)
 
