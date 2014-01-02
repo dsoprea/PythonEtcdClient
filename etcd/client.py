@@ -6,11 +6,24 @@ from etcd.config import DEFAULT_HOSTNAME, DEFAULT_PORT, DEFAULT_SCHEME
 from etcd.directory_ops import DirectoryOps
 from etcd.node_ops import NodeOps
 from etcd.server_ops import ServerOps
-from etcd.lock_ops import LockOps
+from etcd.modules.lock import LockMod
 from etcd.response import ResponseV2
 
 # TODO: Add support for SSL: 
 #   curl --key ./fixtures/ca/server2.key.insecure --cert ./fixtures/ca/server2.crt --cacert ./fixtures/ca/server-chain.pem -L https://127.0.0.1:4001/v2/keys/foo -XPUT -d value=bar -v
+
+
+class _Modules(object):
+    def __init__(self, client):
+        self.__client = client
+
+    @property
+    def lock(self):
+        try:
+            return self.__lock
+        except AttributeError:
+            self.__lock = LockMod(self.__client)
+            return self.__lock
 
 
 class Client(object):
@@ -105,9 +118,9 @@ class Client(object):
             return self.__server
 
     @property
-    def lock(self):
+    def module(self):
         try:
-            return self.__lock
+            return self.__module
         except AttributeError:
-            self.__lock = LockOps(self)
-            return self.__lock
+            self.__module = _Modules(self)
+            return self.__module

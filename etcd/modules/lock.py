@@ -248,7 +248,7 @@ class _ReentrantLock(_LockBase):
         self.__instance_value = None
 
 
-class LockOps(CommonOps):
+class LockMod(CommonOps):
     def __init__(self, client):
         self.__client = client
 
