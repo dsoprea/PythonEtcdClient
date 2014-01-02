@@ -39,9 +39,13 @@ class ResponseV2BasicNode(object):
         self.created_index = node['createdIndex']
         self.modified_index = node['modifiedIndex']
         self.key = node['key']
+
+        # This is as involved as we'll get with whether nodes are hidden. Any 
+        # more, and we'd have to manage and, therefore, translate every key 
+        # reported by the server.
         self.is_hidden = basename(node['key']).startswith('_')
 
-        # >> Process TTL stuff. 
+        # >> Process TTL-related stuff. 
 
         try:
             expiration = node['expiration']
