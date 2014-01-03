@@ -57,13 +57,19 @@ print
 
 q = c.queue.get_queue('/queue_2302')
 
-r = q.add('value9999')
+value = 'value9999'
+r = q.add(value)
+print("Add " + value)
 print(r)
 
-r = q.add('value1111')
+value = 'value1111'
+r = q.add(value)
+print("Add " + value)
 print(r)
 
-r = q.list(sorted=True)
+print
+
+r = q.list()
 print(r)
 
 print

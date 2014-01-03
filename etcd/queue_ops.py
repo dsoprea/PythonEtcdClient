@@ -10,9 +10,13 @@ class _Queue(object):
 # TODO: Can we send a TTL?
         return self.__client.send(2, 'post', self.__fq_path, value=value)
 
-    def list(self, sorted=False):
+    def list(self, sorted=True):
+        """Return a list of the queued nodes. Setting "sorted" to True 
+        indicates that they will be returned in the proper, chronological 
+        order.
+        """
+
         parameters = {}
-# TODO: What does "sorted" do? (it doesn't seem to sort by value, but then what else could it be used for?)
 # TODO: What does "recursive" do when sent with a GET on a queue.
         if sorted is True:
             parameters['sorted'] = 'true'
