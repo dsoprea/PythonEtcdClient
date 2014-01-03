@@ -35,6 +35,22 @@ class NodeOps(CommonOps):
 
         return self.__client.send(2, 'put', fq_path, value, data=data)
 
+    def wait(self, path, recursive=False):
+        fq_path = self.get_fq_node_path(path)
+
+        parameters = { 'wait': 'true' }
+
+        if recursive is True:
+            parameters['recursive'] = 'true'
+
+        try:
+            return self.__client.send(2, 'get', fq_path, parameters=parameters)
+        except HTTPError as e:
+            if e.response.status_code == codes.not_found:
+                raise KeyError(path)
+
+            raise
+
     def delete(self, path):
         fq_path = self.get_fq_node_path(path)
         return self.__client.send(2, 'delete', fq_path)
