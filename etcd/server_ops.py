@@ -41,5 +41,3 @@ class ServerOps(CommonOps):
 
     def get_dashboard_url(self):
         return (self.__client.prefix + '/mod/dashboard')
-
-# TODO: Add methods for modules: locking, leader election

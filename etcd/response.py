@@ -182,5 +182,3 @@ class ResponseV2(object):
 
     def __repr__(self):
         return ('<RESPONSE: %s>' % (self.node))
-
-# TODO: We need to handle the "TTL" expired response. Does this happen on a GET?
