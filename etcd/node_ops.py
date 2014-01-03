@@ -22,7 +22,13 @@ class NodeOps(CommonOps):
             return self.__client.send(2, 'get', fq_path, parameters=parameters)
         except HTTPError as e:
             if e.response.status_code == codes.not_found:
-                raise KeyError(path)
+                try:
+                    j = e.response.json()
+                except ValueError:
+                    pass
+                else:
+                    if j['errorCode'] == 100:
+                        raise KeyError(path)
 
             raise
 
