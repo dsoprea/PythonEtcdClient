@@ -55,6 +55,30 @@ print
 
 #exit(0)
 
+q = c.queue.get_queue('/queue_2302')
+
+r = q.add('value9999')
+print(r)
+
+r = q.add('value1111')
+print(r)
+
+r = q.list(sorted=True)
+print(r)
+
+print
+
+for child in r.node.children:
+    print(child)
+    print(child.value)
+
+print
+
+r = c.directory.delete_recursive('/queue_2302')
+print(r)
+
+exit(0)
+
 #r = c.node.set('/test_2056/val1', 5, ttl=60)
 #print(r)
 

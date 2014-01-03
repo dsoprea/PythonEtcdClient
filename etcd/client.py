@@ -6,6 +6,7 @@ from etcd.config import DEFAULT_HOSTNAME, DEFAULT_PORT, DEFAULT_SCHEME
 from etcd.directory_ops import DirectoryOps
 from etcd.node_ops import NodeOps
 from etcd.server_ops import ServerOps
+from etcd.queue_ops import QueueOps
 from etcd.modules.lock import LockMod
 from etcd.modules.leader import LeaderMod
 from etcd.response import ResponseV2
@@ -125,6 +126,14 @@ class Client(object):
         except AttributeError:
             self.__server = ServerOps(self)
             return self.__server
+
+    @property
+    def queue(self):
+        try:
+            return self.__queue
+        except AttributeError:
+            self.__queue = QueueOps(self)
+            return self.__queue
 
     @property
     def module(self):
