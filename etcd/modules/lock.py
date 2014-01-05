@@ -121,7 +121,7 @@ class _Lock(_LockBase):
 
           raise
         else:
-          return int(r.text)
+          return int(r.text) if r.text != '' else None
 
     def release(self):
         if self.__index is None:
