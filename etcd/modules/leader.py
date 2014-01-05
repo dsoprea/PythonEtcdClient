@@ -1,3 +1,5 @@
+from requests.exceptions import HTTPError
+
 from etcd.common_ops import CommonOps
 
 
@@ -33,15 +35,46 @@ class LeaderMod(CommonOps):
 
         fq_path = self.__get_path(key)
 
-        self.__client.send(2, 'get', fq_path, module='leader', 
-                           return_raw=True)
+# TODO: 
+#
+# If this fails, we get a text response on a 200:
+#
+#       get leader error: read lock error: Cannot reach servers after 3 time\n
+#
+# Raise a KeyError when this is fixed.
+
+        r = self.__client.send(2, 'get', fq_path, module='leader', 
+                               return_raw=True)
+
+        if r.text == '':
+            return None
+
+        result = r.text
+        if result.startswith('get leader error:') is True:
+            raise KeyError(key)
+
+        return result
 
     def delete(self, key, value):
         self.__client.debug("LEADER: Deleting key [%s] with value [%s]." % 
                             (key, value))
 
+# TODO: 
+#
+# If this fails, we get a text response with a 500: 
+#
+#       delete leader error: release lock error: cannot find: test value
+#
+# Raise a KeyError when this is fixed.
+
         fq_path = self.__get_path(key)
         parameters = { 'name': value }
 
-        self.__client.send(2, 'delete', fq_path, module='leader', 
-                           parameters=parameters, return_raw=True)
+        try:
+            self.__client.send(2, 'delete', fq_path, module='leader', 
+                               parameters=parameters, return_raw=True)
+        except HTTPError as e:
+            if e.response.status_code == 500:
+                raise KeyError(key)
+
+            raise
