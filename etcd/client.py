@@ -59,6 +59,9 @@ class Client(object):
         if self.__version.startswith('0.2') is False:
             raise ValueError("We don't support an etcd version older than 0.2.0 .")
 
+    def __str__(self):
+        return ('<ETCD %s>' % (self.__prefix))
+
     def debug(self, message):
         if self.__debug is True:
             print("EC: %s" % (message))

@@ -4,7 +4,11 @@ from etcd.client import Client
 
 c = Client()
 
+print(c)
+
 print
+
+exit(0)
 
 #print(c.server.get_version())
 #print(c.server.get_leader_url_prefix())
