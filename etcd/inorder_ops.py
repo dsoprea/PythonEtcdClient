@@ -1,7 +1,7 @@
 from etcd.common_ops import CommonOps
 
 
-class _Queue(object):
+class _InOrder(object):
     def __init__(self, client, fq_path):
         self.__client = client
         self.__fq_path = fq_path
@@ -25,10 +25,10 @@ class _Queue(object):
                                   parameters=parameters)
 
 
-class QueueOps(CommonOps):
+class InOrderOps(CommonOps):
     def __init__(self, client):
         self.__client = client
 
-    def get_queue(self, path):
+    def get_inorder(self, path):
         fq_path = self.get_fq_node_path(path)
-        return _Queue(self.__client, fq_path)
+        return _InOrder(self.__client, fq_path)

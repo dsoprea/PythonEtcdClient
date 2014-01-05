@@ -7,10 +7,11 @@ from etcd.common_ops import CommonOps
 
 
 class _LockBase(object):
-    def __init__(self, client, lock_name):
+    def __init__(self, client, lock_name, ttl_s):
         self.__client = client
         self.__lock_name = lock_name
         self.__path = '/' + lock_name
+        self.__ttl_s = ttl_s
 
     def __enter__(self):
         self.acquire()
@@ -19,13 +20,10 @@ class _LockBase(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.release()
 
-    def acquire(self, ttl):
+    def acquire(self):
         raise NotImplementedError()
 
-    def renew(self, ttl):
-        raise NotImplementedError()
-
-    def get_active_value(self):
+    def renew(self, ttl_s):
         raise NotImplementedError()
 
     def release(self):
@@ -43,20 +41,23 @@ class _LockBase(object):
     def path(self):
         return self.__path
 
+    @property
+    def ttl_s(self):
+        return self.__ttl_s
+
 
 class _Lock(_LockBase):
     """This lock will seek acquire an exclusive lock every time."""
 
     def __init__(self, client, lock_name, ttl_s):
-        super(_Lock, self).__init__(client, lock_name)
+        super(_Lock, self).__init__(client, lock_name, ttl_s)
 
         self.__index = None
-        self.__ttl_s = ttl_s
 
     def acquire(self):
         self.client.debug("Acquiring lock: %s" % (self.path))
 
-        parameters = { 'ttl': self.__ttl_s }
+        parameters = { 'ttl': self.ttl_s }
 
         try:
           r = self.client.send(2, 
@@ -155,16 +156,15 @@ class _ReentrantLock(_LockBase):
     """
 
     def __init__(self, client, lock_name, instance_value, ttl_s):
-        super(_ReentrantLock, self).__init__(client, lock_name)
+        super(_ReentrantLock, self).__init__(client, lock_name, ttl_s)
 
         self.__instance_value = instance_value
-        self.__ttl_s = ttl_s
 
     def acquire(self):
         self.client.debug("Acquiring rlock [%s]: %s" % 
                           (self.__instance_value, self.path))
 
-        parameters = { 'ttl': self.__ttl_s }
+        parameters = { 'ttl': self.ttl_s }
 
         try:
           self.client.send(2, 
