@@ -7,11 +7,11 @@ from etcd.common_ops import CommonOps
 
 
 class _LockBase(object):
-    def __init__(self, client, lock_name, ttl_s):
+    def __init__(self, client, lock_name, ttl):
         self.__client = client
         self.__lock_name = lock_name
         self.__path = '/' + lock_name
-        self.__ttl_s = ttl_s
+        self.__ttl = ttl
 
     def __enter__(self):
         self.acquire()
@@ -23,7 +23,7 @@ class _LockBase(object):
     def acquire(self):
         raise NotImplementedError()
 
-    def renew(self, ttl_s):
+    def renew(self, ttl):
         raise NotImplementedError()
 
     def release(self):
@@ -42,22 +42,22 @@ class _LockBase(object):
         return self.__path
 
     @property
-    def ttl_s(self):
-        return self.__ttl_s
+    def ttl(self):
+        return self.__ttl
 
 
 class _Lock(_LockBase):
     """This lock will seek acquire an exclusive lock every time."""
 
-    def __init__(self, client, lock_name, ttl_s):
-        super(_Lock, self).__init__(client, lock_name, ttl_s)
+    def __init__(self, client, lock_name, ttl):
+        super(_Lock, self).__init__(client, lock_name, ttl)
 
         self.__index = None
 
     def acquire(self):
         self.client.debug("Acquiring lock: %s" % (self.path))
 
-        parameters = { 'ttl': self.ttl_s }
+        parameters = { 'ttl': self.ttl }
 
         try:
           r = self.client.send(2, 
@@ -77,13 +77,13 @@ class _Lock(_LockBase):
         else:
           self.__index = int(r.text)
 
-    def renew(self, ttl_s):
+    def renew(self, ttl):
         if self.__index is None:
           raise ValueError("Could not renew unacquired lock: %s" % (path))
 
         self.client.debug("Renewing lock: %s" % (self.path))
 
-        parameters = { 'ttl': ttl_s }
+        parameters = { 'ttl': ttl }
         data = { 'index': self.__index }
 
         try:
@@ -155,8 +155,8 @@ class _ReentrantLock(_LockBase):
     anything with the same instance-value.
     """
 
-    def __init__(self, client, lock_name, instance_value, ttl_s):
-        super(_ReentrantLock, self).__init__(client, lock_name, ttl_s)
+    def __init__(self, client, lock_name, instance_value, ttl):
+        super(_ReentrantLock, self).__init__(client, lock_name, ttl)
 
         self.__instance_value = instance_value
 
@@ -164,7 +164,7 @@ class _ReentrantLock(_LockBase):
         self.client.debug("Acquiring rlock [%s]: %s" % 
                           (self.__instance_value, self.path))
 
-        parameters = { 'ttl': self.ttl_s }
+        parameters = { 'ttl': self.ttl }
 
         try:
           self.client.send(2, 
@@ -183,11 +183,11 @@ class _ReentrantLock(_LockBase):
 
           raise
 
-    def renew(self, ttl_s):
+    def renew(self, ttl):
         self.client.debug("Renewing rlock [%s]: %s" % 
                           (self.__instance_value, self.path))
 
-        parameters = { 'ttl': ttl_s }
+        parameters = { 'ttl': ttl }
 
         try:
           self.client.send(2, 
@@ -254,8 +254,8 @@ class LockMod(CommonOps):
     def __init__(self, client):
         self.__client = client
 
-    def get_lock(self, lock_name, ttl_s):
-        return _Lock(self.__client, lock_name, ttl_s)
+    def get_lock(self, lock_name, ttl):
+        return _Lock(self.__client, lock_name, ttl)
 
-    def get_rlock(self, lock_name, instance_value, ttl_s):
-        return _ReentrantLock(self.__client, lock_name, instance_value, ttl_s)
+    def get_rlock(self, lock_name, instance_value, ttl):
+        return _ReentrantLock(self.__client, lock_name, instance_value, ttl)
