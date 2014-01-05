@@ -192,7 +192,7 @@ class _ReentrantLock(_LockBase):
         try:
           self.client.send(2, 
                            'put', 
-                           f.path, 
+                           self.path, 
                            module='lock', 
                            parameters=parameters,
                            value=self.__instance_value,
@@ -223,7 +223,7 @@ class _ReentrantLock(_LockBase):
 
           raise
 
-        return r.text
+        return r.text if r.text != '' else None
 
     def release(self):
         self.client.debug("Releasing rlock [%s]: %s" % 
