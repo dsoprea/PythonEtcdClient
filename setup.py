@@ -1,3 +1,5 @@
+#!/usr/bin/env python2.7
+
 from setuptools import setup, find_packages
 import sys, os
 
