@@ -22,7 +22,7 @@ class NodeOps(CommonOps):
         :type recursive: bool
 
         :returns: Response object
-        :rtype: etcd.response.ResponseV2
+        :rtype: response.ResponseV2
 
         :raises: KeyError
         """
@@ -119,8 +119,8 @@ class NodeOps(CommonOps):
 
     def compare_and_swap(self, path, value, current_value=None, 
                          current_index=None, prev_exists=None, ttl=None):
-        """The base compare-and-swap function for atomic comparisons. Multiple 
-        criteria may be used if necessary.
+        """The base compare-and-swap function for atomic comparisons. A  
+        combination of criteria may be used if necessary.
 
         :param path: Node key
         :param value: Value to assign
