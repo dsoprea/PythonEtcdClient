@@ -19,7 +19,7 @@ class NodeOps(CommonOps):
         :param recursive: Node is a directory, and we want to read it 
                           recursively.
         :type path: string
-        :type recursive: bool or False
+        :type recursive: bool
         :returns: Response object
         :rtype: etcd.response.ResponseV2
         :raises: KeyError
@@ -74,7 +74,7 @@ class NodeOps(CommonOps):
         :param recursive: Wait on any change in the given directory or any of 
                           its descendants.
         :type path: string
-        :type recursive: bool or None
+        :type recursive: bool
         :returns: Response object
         :rtype: etcd.response.ResponseV2
         :raises: KeyError
