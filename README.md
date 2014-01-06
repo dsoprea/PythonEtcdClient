@@ -1,15 +1,5 @@
-# Title A
-
-## Title BB
-
-### Title CCC
-
-#### Title DDDD
-
-##### Title EEEEE
-
 Introduction
-============
+------------
 
 *PEC* was created as a more elegant or proper client for *etcd* than existing 
 solutions. It has an intuitive construction, provides access to the 
@@ -20,7 +10,7 @@ re-raised as Python-standard exceptions where it makes sense (like "KeyError").
 
 
 Quick Start
-===========
+-----------
 
 There's almost nothing to it:
 
@@ -39,7 +29,7 @@ print(r.node.value)
 ```
 
 General Functions
-=================
+-----------------
 
 These functions represent the basic key-value functionality of *etcd*.
 
@@ -120,7 +110,7 @@ print(r)
 
 
 Compare and Swap Functions
-==========================
+--------------------------
 
 These functions represent *etcd*'s atomic comparisons. These allow for a "set"-
 type operation when one or more conditions are met.
@@ -176,7 +166,7 @@ print(r)
 
 
 Directory Functions
-===================
+-------------------
 
 These functions represent directory-specific calls. Whereas creating a node has 
 side-effects that contribute to directory management (like creating a node 
@@ -227,7 +217,7 @@ print(r)
 
 
 Server Functions
-================
+----------------
 
 These functions represent calls that return information about the server or 
 cluster.
@@ -283,7 +273,7 @@ print(r)
 
 
 In-Order-Keys Functions
-=======================
+-----------------------
 
 These calls represent the in-order functionality, where a directory can be used 
 to store a series of values with automatically-assigned, increasing keys. 
@@ -317,12 +307,11 @@ for child in r.node.children:
 
 
 Locking Module Functions
-========================
+------------------------
 
 These functions represent the fair locking functionality that comes packaged.
 
-Standard Locking
-----------------
+### Standard Locking
 
 A simple, distributed lock:
 
@@ -346,8 +335,7 @@ with c.module.lock.get_lock('test_lock_1', ttl=10):
     print("In lock 1.")
 ```
 
-Reentrant Locking
------------------
+### Reentrant Locking
 
 Here, a name for the lock is provided, as well as a value that represents a 
 certain locking purpose, process, or host. Subsequent requests having the same 
@@ -382,7 +370,7 @@ with c.module.lock.get_rlock('test_lock_2', 'proc1', ttl=10):
 
 
 Leader Election Module Functions
-================================
+--------------------------------
 
 The leader-election API does consensus-based assignment, meaning that, of all 
 of the clients potentially attempting to assign a value to a name, only one 
