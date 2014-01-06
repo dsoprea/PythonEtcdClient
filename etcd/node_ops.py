@@ -22,7 +22,7 @@ class NodeOps(CommonOps):
         :type recursive: bool
 
         :returns: Response object
-        :rtype: :class:etcd.response.ResponseV2
+        :rtype: :class:`etcd.response.ResponseV2`
 
         :raises: KeyError
         """
@@ -60,7 +60,7 @@ class NodeOps(CommonOps):
         :type ttl: int or None
 
         :returns: Response object
-        :rtype: etcd.response.ResponseV2
+        :rtype: :class:`etcd.response.ResponseV2`
         """
 
         fq_path = self.get_fq_node_path(path)
@@ -82,7 +82,7 @@ class NodeOps(CommonOps):
         :type recursive: bool
 
         :returns: Response object
-        :rtype: etcd.response.ResponseV2
+        :rtype: :class:`etcd.response.ResponseV2`
 
         :raises: KeyError
         """
@@ -109,7 +109,7 @@ class NodeOps(CommonOps):
         :type path: string
 
         :returns: Response object
-        :rtype: etcd.response.ResponseV2
+        :rtype: :class:`etcd.response.ResponseV2`
         """
 
         fq_path = self.get_fq_node_path(path)
@@ -137,7 +137,7 @@ class NodeOps(CommonOps):
         :type ttl: int or None
 
         :returns: Response object
-        :rtype: etcd.response.ResponseV2
+        :rtype: :class:`etcd.response.ResponseV2`
 
         :raises: etcd.exceptions.EtcdPreconditionException
         """
@@ -185,7 +185,7 @@ class NodeOps(CommonOps):
         :type ttl: int or None
 
         :returns: Response object
-        :rtype: etcd.response.ResponseV2
+        :rtype: :class:`etcd.response.ResponseV2`
         """
 
         # This will have a return "action" of "create".
@@ -204,7 +204,7 @@ class NodeOps(CommonOps):
         :type ttl: int or None
 
         :returns: Response object
-        :rtype: etcd.response.ResponseV2
+        :rtype: :class:`etcd.response.ResponseV2`
         """
 
         # This will have a return "action" of "update".
@@ -225,7 +225,7 @@ class NodeOps(CommonOps):
         :type ttl: int or None
 
         :returns: Response object
-        :rtype: etcd.response.ResponseV2
+        :rtype: :class:`etcd.response.ResponseV2`
         """
 
         # This will have a return "action" of "compareAndSwap".
@@ -246,7 +246,7 @@ class NodeOps(CommonOps):
         :type ttl: int or None
 
         :returns: Response object
-        :rtype: etcd.response.ResponseV2
+        :rtype: :class:`etcd.response.ResponseV2`
         """
 
         # This will have a return "action" of "compareAndSwap".

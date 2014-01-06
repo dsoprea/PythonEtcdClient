@@ -21,6 +21,11 @@ class _Modules(object):
 
     @property
     def lock(self):
+        """Return an instance of the class having the lock functionality.
+
+        :rtype: :class:`etcd.response.ResponseV2`
+        """
+
         try:
             return self.__lock
         except AttributeError:
@@ -29,6 +34,12 @@ class _Modules(object):
 
     @property
     def leader(self):
+        """Return an instance of the class having the leader-election 
+        functionality.
+
+        :rtype: :class:`etcd.modules.leader.LeaderMod`
+        """
+
         try:
             return self.__leader
         except AttributeError:
@@ -37,7 +48,27 @@ class _Modules(object):
 
 
 class Client(object):
+    """The main channel of functionality for the client. Connects to the 
+    server, and provides functions via properties.
+    """
+
     def __init__(self, hostname=DEFAULT_HOSTNAME, port=DEFAULT_PORT, scheme=DEFAULT_SCHEME, debug=False):
+        """Set the given node.
+
+        :param hostname: Hostname of server
+        :param port: Port of server
+        :param scheme: URI scheme
+        :param debug: Whether to print debug verbosity (can be provided as the 
+                      ETCD_DEBUG environment variable, as well)
+
+        :type hostname: string
+        :type port: int
+        :type scheme: string
+        :type debug: bool
+
+        :raises: ValueError
+        """
+
         debug_override = environ.get('ETCD_DEBUG')
         if debug_override is not None and debug_override == 'true':
             debug = True
@@ -67,6 +98,33 @@ class Client(object):
             print("EC: %s" % (message))
 
     def send(self, version, verb, path, value=None, parameters=None, data=None, module=None, return_raw=False):
+        """Build and execute a request.
+
+        :param version: Version of API
+        :param verb: Verb of request ('get', 'post', etc..)
+        :param path: URL path
+        :param value: Value to be converted to string and passed as "value" in 
+                      the POST data.
+        :param parameters: Dictionary of values to be passed via URL query.
+        :param data: Dictionary of values to be passed via POST data.
+        :param module: Name of the etcd module that hosts the functionality.
+        :param return_raw: Whether to return a 
+                           :class:`etcd.response.ResponseV2` object or the raw 
+                           Requests response.
+
+        :type version: int
+        :type verb: string
+        :type path: string
+        :type value: scalar or None
+        :type parameters: dictionary or None
+        :type data: dictionary or None
+        :type module: string or None
+        :type return_raw: bool
+
+        :returns: Response object
+        :rtype: :class:`etcd.response.ResponseV2`
+        """
+
         if parameters is None:
             parameters = {}
 
@@ -104,10 +162,20 @@ class Client(object):
 
     @property
     def prefix(self):
+        """Return the URL prefix for the server.
+
+        :rtype: string
+        """
+
         return self.__prefix
 
     @property
     def directory(self):
+        """Return an instance of the class having the directory functionality.
+
+        :rtype: :class:`etcd.directory_ops.DirectoryOps`
+        """
+
         try:
             return self.__directory
         except AttributeError:
@@ -116,6 +184,12 @@ class Client(object):
 
     @property
     def node(self):
+        """Return an instance of the class having the general node 
+        functionality.
+
+        :rtype: :class:`etcd.node_ops.NodeOps`
+        """
+
         try:
             return self.__node
         except AttributeError:
@@ -124,6 +198,11 @@ class Client(object):
 
     @property
     def server(self):
+        """Return an instance of the class having the server functionality.
+
+        :rtype: :class:`etcd.server_ops.ServerOps`
+        """
+
         try:
             return self.__server
         except AttributeError:
@@ -132,6 +211,12 @@ class Client(object):
 
     @property
     def inorder(self):
+        """Return an instance of the class having the "in-order keys" 
+        functionality.
+
+        :rtype: :class:`etcd.inorder_ops.InOrderOps`
+        """
+
         try:
             return self.__inorder
         except AttributeError:
@@ -140,6 +225,12 @@ class Client(object):
 
     @property
     def module(self):
+        """Return an instance of the class that hosts the functionality 
+        provided by individual modules.
+
+        :rtype: :class:`_Modules`
+        """
+
         try:
             return self.__module
         except AttributeError:
