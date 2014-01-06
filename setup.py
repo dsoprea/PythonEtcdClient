@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '0.1.0'
+version = '1.1.2'
 
 setup(name='etcd',
       version=version,
@@ -12,7 +12,7 @@ A Python etcd client that just works.""",
       keywords='etcd',
       author='Dustin Oprea',
       author_email='myselfasunder@gmail.com',
-      url='',
+      url='https://github.com/dsoprea/PythonEtcdClient',
       license='GPL 2',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,
