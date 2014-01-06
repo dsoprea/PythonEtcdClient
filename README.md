@@ -14,18 +14,19 @@ Quick Start
 
 There's almost nothing to it:
 
-    from etcd import Client
+```python
+from etcd import Client
 
-    # Uses the default *etcd* port on *localhost* unless told differently.
-    c = Client()
+# Uses the default *etcd* port on *localhost* unless told differently.
+c = Client()
 
-    c.node.set('/test/key', 5)
+c.node.set('/test/key', 5)
 
-    r = c.node.get('/test/key')
+r = c.node.get('/test/key')
 
-    print(r.node.value)
-    # Displays "5".
-
+print(r.node.value)
+# Displays "5".
+```
 
 General Functions
 =================
@@ -34,68 +35,78 @@ These functions represent the basic key-value functionality of *etcd*.
 
 Set a value:
 
-    # Can provide a "ttl" parameter with seconds, for expiration.
-    r = c.node.set('/node_test/subkey1', 5)
+```python
+# Can provide a "ttl" parameter with seconds, for expiration.
+r = c.node.set('/node_test/subkey1', 5)
 
-    print(r)
-    # Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [set] [/node_test/subkey1] 
-    #           IS_HID=[False] IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] 
-    #           TTL=[None] CI=(5) MI=(5)>>
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [set] [/node_test/subkey1] 
+#           IS_HID=[False] IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] 
+#           TTL=[None] CI=(5) MI=(5)>>
+```
 
 Get a value:
 
-    r = c.node.get('/node_test/subkey1')
+```python
+r = c.node.get('/node_test/subkey1')
 
-    print(r)
-    # Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [get] [/node_test/subkey1] 
-    #           IS_HID=[False] IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] 
-    #           TTL=[None] CI=(5) MI=(5)>>
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [get] [/node_test/subkey1] 
+#           IS_HID=[False] IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] 
+#           TTL=[None] CI=(5) MI=(5)>>
 
-    print(r.node.value)
-    # Prints "5"
+print(r.node.value)
+# Prints "5"
+```
 
 Get children:
 
-    r = c.node.set('/node_test/subkey2', 10)
-    
-    print(r)
-    # Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [set] [/node_test/subkey2] 
-    #           IS_HID=[False] IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] 
-    #           TTL=[None] CI=(6) MI=(6)>>
+```python
+r = c.node.set('/node_test/subkey2', 10)
 
-    r = c.node.get('/node_test')
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [set] [/node_test/subkey2] 
+#           IS_HID=[False] IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] 
+#           TTL=[None] CI=(6) MI=(6)>>
 
-    print(r)
-    # Prints: <RESPONSE: <NODE(ResponseV2AliveDirectoryNode) [get] [/node_test] 
-    #           IS_HID=[False] TTL=[None] IS_DIR=[True] IS_COLL=[True] 
-    #           COUNT=[2] CI=(5) MI=(5)>>
+r = c.node.get('/node_test')
+
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2AliveDirectoryNode) [get] [/node_test] 
+#           IS_HID=[False] TTL=[None] IS_DIR=[True] IS_COLL=[True] 
+#           COUNT=[2] CI=(5) MI=(5)>>
+```
 
 Get children, recursively:
 
-    r = c.node.get('/node_test', recursive=True)
+```python
+r = c.node.get('/node_test', recursive=True)
 
-    print(r)
-    # Prints: <RESPONSE: <NODE(ResponseV2AliveDirectoryNode) [get] [/node_test] 
-    #           IS_HID=[False] TTL=[None] IS_DIR=[True] IS_COLL=[True] 
-    #           COUNT=[2] CI=(5) MI=(5)>>
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2AliveDirectoryNode) [get] [/node_test] 
+#           IS_HID=[False] TTL=[None] IS_DIR=[True] IS_COLL=[True] 
+#           COUNT=[2] CI=(5) MI=(5)>>
 
-    for node in r.node.children:
-        print(node)
+for node in r.node.children:
+    print(node)
 
-    # Prints:
-    # <NODE(ResponseV2AliveNode) [get] [/node_test/subkey1] IS_HID=[False] 
-    #   IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] TTL=[None] CI=(5) MI=(5)>
-    # <NODE(ResponseV2AliveNode) [get] [/node_test/subkey2] IS_HID=[False] 
-    #   IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] TTL=[None] CI=(6) MI=(6)>
+# Prints:
+# <NODE(ResponseV2AliveNode) [get] [/node_test/subkey1] IS_HID=[False] 
+#   IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] TTL=[None] CI=(5) MI=(5)>
+# <NODE(ResponseV2AliveNode) [get] [/node_test/subkey2] IS_HID=[False] 
+#   IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] TTL=[None] CI=(6) MI=(6)>
+```
 
 Delete node:
 
-    r = c.node.delete('/node_test/subkey2')
+```python
+r = c.node.delete('/node_test/subkey2')
 
-    print(r)
-    # Prints: <RESPONSE: <NODE(ResponseV2DeletedNode) [delete] 
-    #           [/node_test/subkey2] IS_HID=[False] IS_DEL=[True] 
-    #           IS_DIR=[False] IS_COLL=[False] TTL=[None] CI=(6) MI=(7)>>
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2DeletedNode) [delete] 
+#           [/node_test/subkey2] IS_HID=[False] IS_DEL=[True] 
+#           IS_DIR=[False] IS_COLL=[False] TTL=[None] CI=(6) MI=(7)>>
+```
 
 
 Compare and Swap Functions
@@ -115,39 +126,43 @@ is given that fails, a *etcd.exceptions.EtcdPreconditionException* is raised.
 
 The core call is:
 
-    r = c.node.compare_and_swap('/cas_test/val1', 30, current_value=5, 
-                                prev_exists=True, current_index=5)
+```python
+r = c.node.compare_and_swap('/cas_test/val1', 30, current_value=5, 
+                            prev_exists=True, current_index=5)
+```
 
 The following convenience functions are also provided, but only allow you to 
 check one, specific condition:
 
-    r = c.node.create_only('/cas_test/val1', 5)
+```python
+r = c.node.create_only('/cas_test/val1', 5)
 
-    print(r)
-    # Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [create] [/cas_test/val1] 
-    #           IS_HID=[False] IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] 
-    #           TTL=[None] CI=(10) MI=(10)>>
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [create] [/cas_test/val1] 
+#           IS_HID=[False] IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] 
+#           TTL=[None] CI=(10) MI=(10)>>
 
-    r = c.node.update_only('/cas_test/val1', 10)
+r = c.node.update_only('/cas_test/val1', 10)
 
-    print(r)
-    # Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [update] [/cas_test/val1] 
-    #           IS_HID=[False] IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] 
-    #           TTL=[None] CI=(10) MI=(13)>>
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [update] [/cas_test/val1] 
+#           IS_HID=[False] IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] 
+#           TTL=[None] CI=(10) MI=(13)>>
 
-    r = c.node.update_if_index('/cas_test/val1', 15, r.node.modified_index)
+r = c.node.update_if_index('/cas_test/val1', 15, r.node.modified_index)
 
-    print(r)
-    # Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [compareAndSwap] 
-    #           [/cas_test/val1] IS_HID=[False] IS_DEL=[False] IS_DIR=[False] 
-    #           IS_COLL=[False] TTL=[None] CI=(10) MI=(14)>>
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [compareAndSwap] 
+#           [/cas_test/val1] IS_HID=[False] IS_DEL=[False] IS_DIR=[False] 
+#           IS_COLL=[False] TTL=[None] CI=(10) MI=(14)>>
 
-    r = c.node.update_if_value('/cas_test/val1', 20, 15)
+r = c.node.update_if_value('/cas_test/val1', 20, 15)
 
-    print(r)
-    # Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [compareAndSwap] 
-    #           [/cas_test/val1] IS_HID=[False] IS_DEL=[False] IS_DIR=[False] 
-    #           IS_COLL=[False] TTL=[None] CI=(10) MI=(15)>>
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [compareAndSwap] 
+#           [/cas_test/val1] IS_HID=[False] IS_DEL=[False] IS_DIR=[False] 
+#           IS_COLL=[False] TTL=[None] CI=(10) MI=(15)>>
+```
 
 
 Directory Functions
@@ -160,39 +175,45 @@ directory specific.
 
 Create directory:
 
-    # Can provide a "ttl" parameter with seconds, for expiration.
-    r = c.directory.create('/dir_test/new_dir')
-    
-    print(r)
-    # Prints: <RESPONSE: <NODE(ResponseV2AliveDirectoryNode) [set] 
-    #           [/dir_test/new_dir] IS_HID=[False] TTL=[None] IS_DIR=[True] 
-    #           IS_COLL=[False] COUNT=[<NA>] CI=(16) MI=(16)>
+```python
+# Can provide a "ttl" parameter with seconds, for expiration.
+r = c.directory.create('/dir_test/new_dir')
+
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2AliveDirectoryNode) [set] 
+#           [/dir_test/new_dir] IS_HID=[False] TTL=[None] IS_DIR=[True] 
+#           IS_COLL=[False] COUNT=[<NA>] CI=(16) MI=(16)>
+```
 
 Remove an empty directory:
 
-    r = c.directory.delete('/dir_test/new_dir')
-    
-    print(r)
-    # Prints: <RESPONSE: <NODE(ResponseV2DeletedDirectoryNode) [delete] 
-    #           [/dir_test/new_dir] IS_HID=[False] IS_DEL=[True] IS_DIR=[True] 
-    #           IS_COLL=[False] TTL=[None] CI=(16) MI=(17)>>
+```python
+r = c.directory.delete('/dir_test/new_dir')
+
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2DeletedDirectoryNode) [delete] 
+#           [/dir_test/new_dir] IS_HID=[False] IS_DEL=[True] IS_DIR=[True] 
+#           IS_COLL=[False] TTL=[None] CI=(16) MI=(17)>>
+```
 
 Recursively remove a directory, and any contents:
 
-    c.directory.create('/dir_test/new_dir')
-    c.directory.create('/dir_test/new_dir/new_subdir')
+```python
+c.directory.create('/dir_test/new_dir')
+c.directory.create('/dir_test/new_dir/new_subdir')
 
-    # This will raise a requests.exceptions.HTTPError ("403 Client Error: 
-    # Forbidden") because it has children.
-    r = c.directory.delete('/dir_test/new_dir')
+# This will raise a requests.exceptions.HTTPError ("403 Client Error: 
+# Forbidden") because it has children.
+r = c.directory.delete('/dir_test/new_dir')
 
-    # You have to recursively delete it.
-    r = c.directory.delete_recursive('/dir_test')
-    
-    print(r)
-    # Prints: <RESPONSE: <NODE(ResponseV2DeletedDirectoryNode) [delete] 
-    #           [/dir_test] IS_HID=[False] IS_DEL=[True] IS_DIR=[True] 
-    #           IS_COLL=[False] TTL=[None] CI=(16) MI=(20)>>
+# You have to recursively delete it.
+r = c.directory.delete_recursive('/dir_test')
+
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2DeletedDirectoryNode) [delete] 
+#           [/dir_test] IS_HID=[False] IS_DEL=[True] IS_DIR=[True] 
+#           IS_COLL=[False] TTL=[None] CI=(16) MI=(20)>>
+```
 
 
 Server Functions
@@ -203,44 +224,86 @@ cluster.
 
 Get version of the specific host being connected to:
 
-    r = c.server.get_version()
+```python
+r = c.server.get_version()
 
-    print(r)
-    # Prints "0.2.0-45-g98351b9", on my system.
+print(r)
+# Prints "0.2.0-45-g98351b9", on my system.
+```
 
 The URL prefix of the current cluster leader:
 
-    r = c.server.get_leader_url_prefix()
+```python
+r = c.server.get_leader_url_prefix()
 
-    print(r)
-    # Prints "http://127.0.0.1:7001" with my single-host configuration.
+print(r)
+# Prints "http://127.0.0.1:7001" with my single-host configuration.
+```
 
 Enumerate the prefixes of the hosts in the cluster:
 
-    from urlparse import parse_qsl
+```python
+from urlparse import parse_qsl
 
-    machines = c.server.get_machines()
+machines = c.server.get_machines()
 
-    print(machines)
-    # Prints: <RESPONSE: <NODE(ResponseV2AliveDirectoryNode) [get] 
-    #           [/_etcd/machines] IS_HID=[False] TTL=[None] IS_DIR=[True] 
-    #           IS_COLL=[True] COUNT=[1] CI=(1) MI=(1)>>
+print(machines)
+# Prints: <RESPONSE: <NODE(ResponseV2AliveDirectoryNode) [get] 
+#           [/_etcd/machines] IS_HID=[False] TTL=[None] IS_DIR=[True] 
+#           IS_COLL=[True] COUNT=[1] CI=(1) MI=(1)>>
 
-    i = 0
-    for machine in machines.node.children:
-        print("%d: %s" % (i, parse_qsl(machine.value)))
-        i += 1
+i = 0
+for machine in machines.node.children:
+    print("%d: %s" % (i, parse_qsl(machine.value)))
+    i += 1
 
-    # Prints (this :
-    # 0: [(u'etcd', u'http://127.0.0.1:4001'), 
-    #     (u'raft', u'http://127.0.0.1:7001')]
+# Prints (this :
+# 0: [(u'etcd', u'http://127.0.0.1:4001'), 
+#     (u'raft', u'http://127.0.0.1:7001')]
+```
 
 Get URL of the dashboard for the server being connected-to:
 
-    r = c.server.get_dashboard_url()
+```python
+r = c.server.get_dashboard_url()
 
-    print(r)
-    # Prints: http://127.0.0.1:4001/mod/dashboard
+print(r)
+# Prints: http://127.0.0.1:4001/mod/dashboard
+```
+
+
+In-Order-Keys Functions
+=======================
+
+These calls represent the in-order functionality, where a directory can be used 
+to store a series of values with automatically-assigned, increasing keys. 
+Though not quite sufficient as a queue, this might be used to automatically 
+generate unique keys for a set of values.
+
+Enqueue values:
+
+```python
+io = c.inorder.get_inorder('/queue_test')
+
+io.add('value1')
+io.add('value2')
+```
+
+Enumerate existing values:
+
+```python
+# If you want to specifically return the entries in order of the keys 
+# (which is to say that they're in insert-order), use the "sorted"
+# parameter.
+r = io.list()
+
+for child in r.node.children:
+    print(child.value)
+
+# Prints:
+# value1
+# value2
+```
 
 
 Locking Module Functions
@@ -253,19 +316,25 @@ Standard Locking
 
 A simple, distributed lock:
 
-    l = c.module.lock.get_lock('test_lock_1', ttl=10)
-    l.acquire()
-    l.renew(ttl=30)
-    l.release()
+```python
+l = c.module.lock.get_lock('test_lock_1', ttl=10)
+l.acquire()
+l.renew(ttl=30)
+l.release()
+```
 
 This returns the index of the current lock holder:
 
-    l.get_active_index()
+```python
+l.get_active_index()
+```
 
 It's also available as a *with* statement:
 
-    with c.module.lock.get_lock('test_lock_1', ttl=10):
-        print("In lock 1.")
+```python
+with c.module.lock.get_lock('test_lock_1', ttl=10):
+    print("In lock 1.")
+```
 
 Reentrant Locking
 -----------------
@@ -281,53 +350,29 @@ lock.
 
 This is the basic usage (nearly identical to the traditional lock):
 
-    rl = c.module.lock.get_rlock('test_lock_2', 'proc1', ttl=10)
-    rl.acquire()
-    rl.renew(ttl=30)
-    rl.release()
+```python
+rl = c.module.lock.get_rlock('test_lock_2', 'proc1', ttl=10)
+rl.acquire()
+rl.renew(ttl=30)
+rl.release()
+```
 
 This returns the current value of the lock holder(s):
 
-    rl.get_active_value()
+```python
+rl.get_active_value()
+```
 
 This is also provided as a *with* statement:
 
-    with c.module.lock.get_rlock('test_lock_2', 'proc1', ttl=10):
-        print("In lock 2.")
+```python
+with c.module.lock.get_rlock('test_lock_2', 'proc1', ttl=10):
+    print("In lock 2.")
+```
 
 
-In-Order-Keys Functions
-=======================
-
-These calls represent the in-order functionality, where a directory can be used 
-to store a series of values with automatically-assigned, increasing keys. 
-Though not quite sufficient as a queue, this might be used to automatically 
-generate unique keys for a set of values.
-
-Enqueue values:
-
-    io = c.inorder.get_inorder('/queue_test')
-
-    io.add('value1')
-    io.add('value2')
-
-Enumerate existing values:
-
-    # If you want to specifically return the entries in order of the keys 
-    # (which is to say that they're in insert-order), use the "sorted"
-    # parameter.
-    r = io.list()
-
-    for child in r.node.children:
-        print(child.value)
-
-    # Prints:
-    # value1
-    # value2
-
-
-Leader Election Functions
-=========================
+Leader Election Module Functions
+================================
 
 The leader-election API does consensus-based assignment, meaning that, of all 
 of the clients potentially attempting to assign a value to a name, only one 
@@ -336,18 +381,24 @@ deleted.
 
 To set or renew a value:
 
-    c.module.leader.set_or_renew('consensus-based key', 'test value', ttl=10)
+```python
+c.module.leader.set_or_renew('consensus-based key', 'test value', ttl=10)
+```
 
 To get the current value:
 
-    # This will return:
-    # > A non-empty string if the key is set and unexpired.
-    # > None, if the key was set but has been expired or deleted.
-    r = c.module.leader.get('consensus-based key')
+```python
+# This will return:
+# > A non-empty string if the key is set and unexpired.
+# > None, if the key was set but has been expired or deleted.
+r = c.module.leader.get('consensus-based key')
 
-    print(r)
-    # Prints "test value".
+print(r)
+# Prints "test value".
+```
 
 To delete the value (will fail unless there's an unexpired value):
 
-    c.module.leader.delete('consensus-based key', 'test value')
+```python
+c.module.leader.delete('consensus-based key', 'test value')
+```
