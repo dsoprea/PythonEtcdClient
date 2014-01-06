@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Python etcd Client documentation build configuration file, created by
-# sphinx-quickstart on Mon Jan  6 01:58:01 2014.
+# sphinx-quickstart on Mon Jan  6 09:05:18 2014.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
