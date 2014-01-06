@@ -20,8 +20,10 @@ class NodeOps(CommonOps):
                           recursively.
         :type path: string
         :type recursive: bool
+
         :returns: Response object
         :rtype: etcd.response.ResponseV2
+
         :raises: KeyError
         """
 
@@ -52,9 +54,11 @@ class NodeOps(CommonOps):
         :param path: Node key
         :param value: Value to assign
         :param ttl: Number of seconds until expiration
+
         :type path: string
         :type value: scalar
         :type ttl: int or None
+
         :returns: Response object
         :rtype: etcd.response.ResponseV2
         """
@@ -73,10 +77,13 @@ class NodeOps(CommonOps):
         :param path: Node key
         :param recursive: Wait on any change in the given directory or any of 
                           its descendants.
+
         :type path: string
         :type recursive: bool
+
         :returns: Response object
         :rtype: etcd.response.ResponseV2
+
         :raises: KeyError
         """
 
@@ -100,6 +107,7 @@ class NodeOps(CommonOps):
 
         :param path: Node key
         :type path: string
+
         :returns: Response object
         :rtype: etcd.response.ResponseV2
         """
@@ -130,6 +138,7 @@ class NodeOps(CommonOps):
 
         :returns: Response object
         :rtype: etcd.response.ResponseV2
+
         :raises: etcd.exceptions.EtcdPreconditionException
         """
 

@@ -34,6 +34,17 @@ class ResponseV2BasicNode(object):
     "Base-class representing all nodes: deleted, alive, or a collection."
 
     def __init__(self, action, node):
+        """
+        :param action: Action type
+        :param node: Node dictionary
+
+        :type action: string
+        :type node: dictionary
+
+        :returns: Response object
+        :rtype: etcd.response.ResponseV2
+        """
+
         self.action = action
         self.raw_node = node
         self.created_index = node['createdIndex']
@@ -75,6 +86,12 @@ class ResponseV2BasicNode(object):
             pass
 
     def initialize(self, node):
+        """This function acts as the constructor for subclasses.
+
+        :param node: Node dictionary
+        :type node: dictionary
+        """
+
         raise NotImplementedError()
 
     def __repr__(self):
@@ -87,14 +104,30 @@ class ResponseV2BasicNode(object):
 
     @property
     def is_deleted(self):
+        """Is the node deleted?
+
+        :rtype: bool
+        """
+
         return False
 
     @property
     def is_directory(self):
+        """Is the node a directory?
+
+        :rtype: bool
+        """
+
         return False
 
     @property
     def is_collection(self):
+        """If the node is a directory, do we have the collection of children 
+        nodes?
+        
+        :rtype: bool
+        """
+
         return False
 
 
@@ -114,9 +147,7 @@ class ResponseV2DeletedNode(ResponseV2BasicNode):
 
 
 class ResponseV2DirectoryNode(ResponseV2BasicNode):
-    """A base-class representing a single directory node, when children aren't 
-    returned.
-    """
+    """A base-class representing a single directory node."""
 
     @property
     def is_directory(self):
@@ -124,8 +155,8 @@ class ResponseV2DirectoryNode(ResponseV2BasicNode):
 
 
 class ResponseV2AliveDirectoryNode(ResponseV2DirectoryNode):
-    """Represents a single DIRECTORY node either appearing in isolation or
-    among siblings.
+    """Represents a directory node, which may also be accompanied by children 
+    that can be enumerated.
     """
 
     def initialize(self, node):
@@ -157,7 +188,7 @@ class ResponseV2AliveDirectoryNode(ResponseV2DirectoryNode):
         if self.__is_collection is False:
             raise ValueError("This directory node is not a collection.")
 
-# TODO: This will need to cache the new objects for the benefit of repeated enumerations.
+# TODO: Cache the new objects for the benefit of repeated enumerations?
         for node in self.__raw_nodes:
             yield _build_node_object(self.action, node)
 
@@ -176,6 +207,19 @@ class ResponseV2(object):
     "An object that describes a response for every V2 request."
 
     def __init__(self, response, request_verb, request_path):
+        """
+        :param response: Raw Requests response object
+        :param request_verb: Request verb ('get', post', 'put', etc..)
+        :param request_path: Node key
+
+        :type response: requests.models.Response
+        :type request_verb: string
+        :type request_path: string
+
+        :returns: Response object
+        :rtype: etcd.response.ResponseV2
+        """
+
         response_raw = response.json()
         self.node = _build_node_object(response_raw['action'], 
                                        response_raw['node'])
