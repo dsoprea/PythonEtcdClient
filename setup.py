@@ -3,14 +3,22 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '1.1.2'
+version = '1.1.3'
 
 setup(name='etcd',
       version=version,
       description="A Python etcd client that just works.",
       long_description="""\
 A Python etcd client that just works.""",
-      classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      classifiers=[
+            'Intended Audience :: Developers',
+            'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+            'Operating System :: POSIX :: Linux',
+            'Programming Language :: Python :: 2.7',
+            'Topic :: Database :: Front-Ends',
+            'Topic :: Software Development :: Libraries :: Python Modules',
+            'Topic :: System :: Distributed Computing',
+      ], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='etcd',
       author='Dustin Oprea',
       author_email='myselfasunder@gmail.com',
