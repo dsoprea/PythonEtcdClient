@@ -1,7 +1,9 @@
 Introduction
 ============
 
-(finish)
+*PEC* was created as a more elegant or proper client for *etcd* than existing 
+solutions. It has an intuitive construction, and provides access to the 
+complete *etcd* API (of 0.2.0+).
 
 
 Quick Start
@@ -38,8 +40,6 @@ Set a value:
     #           TTL=[None] CI=(5) MI=(5)>>
 
 Get a value:
-
-# TODO: What errors can be emitted, here?
 
     r = c.node.get('/node_test/subkey1')
 
@@ -86,8 +86,6 @@ Get children, recursively:
     #   IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] TTL=[None] CI=(6) MI=(6)>
 
 Delete node:
-
-# TODO: What errors can be emitted, here?
 
     r = c.node.delete('/node_test/subkey2')
 
@@ -177,8 +175,6 @@ Remove an empty directory:
     #           IS_COLL=[False] TTL=[None] CI=(16) MI=(17)>>
 
 Recursively remove a directory, and any contents:
-
-# TODO: What errors can be emitted, here?
 
     c.directory.create('/dir_test/new_dir')
     c.directory.create('/dir_test/new_dir/new_subdir')
