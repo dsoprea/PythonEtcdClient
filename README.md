@@ -1,7 +1,7 @@
 Introduction
 ------------
 
-*PEC* was created as a more elegant or proper client for *etcd* than existing 
+*PEC* was created as a more elegant and proper client for *etcd* than existing 
 solutions. It has an intuitive construction, provides access to the 
 complete *etcd* API (of 0.2.0+), and just works.
 
