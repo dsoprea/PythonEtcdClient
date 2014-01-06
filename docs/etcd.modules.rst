@@ -4,22 +4,10 @@ etcd.modules package
 Submodules
 ----------
 
-etcd.modules.leader module
---------------------------
+.. toctree::
 
-.. automodule:: etcd.modules.leader
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-etcd.modules.lock module
-------------------------
-
-.. automodule:: etcd.modules.lock
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   etcd.modules.leader
+   etcd.modules.lock
 
 Module contents
 ---------------
