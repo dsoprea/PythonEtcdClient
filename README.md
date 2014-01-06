@@ -8,6 +8,8 @@ complete *etcd* API (of 0.2.0+), and just works.
 Every request returns a standard and obvious result, and HTTP exceptions are 
 re-raised as Python-standard exceptions where it makes sense (like "KeyError").
 
+The full API is documented [here](http://python-etcd-client.readthedocs.org/en/latest/).
+
 
 Quick Start
 -----------
