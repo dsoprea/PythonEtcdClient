@@ -1,4 +1,6 @@
 class EtcdException(Exception):
+    """The base exception for the client."""
+
     pass
 
 #class EtcdHttpException(EtcdException):
@@ -14,4 +16,6 @@ class EtcdException(Exception):
 #    pass
 
 class EtcdPreconditionException(EtcdException):
+    """Raised when a CAS condition fails."""
+
     pass

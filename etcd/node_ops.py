@@ -139,7 +139,7 @@ class NodeOps(CommonOps):
         :returns: Response object
         :rtype: :class:`etcd.response.ResponseV2`
 
-        :raises: etcd.exceptions.EtcdPreconditionException
+        :raises: :class:`etcd.exceptions.EtcdPreconditionException`
         """
 
         fq_path = self.get_fq_node_path(path)
