@@ -2,8 +2,11 @@ Introduction
 ============
 
 *PEC* was created as a more elegant or proper client for *etcd* than existing 
-solutions. It has an intuitive construction, and provides access to the 
-complete *etcd* API (of 0.2.0+).
+solutions. It has an intuitive construction, provides access to the 
+complete *etcd* API (of 0.2.0+), and just works.
+
+Every request returns a standard and obvious result, and HTTP exceptions are 
+re-raised as Python-standard exceptions where it makes sense (like "KeyError").
 
 
 Quick Start
