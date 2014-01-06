@@ -31,20 +31,19 @@ def _build_node_object(action, node):
 
 
 class ResponseV2BasicNode(object):
-    "Base-class representing all nodes: deleted, alive, or a collection."
+    """Base-class representing all nodes: deleted, alive, or a collection.
+
+    :param action: Action type
+    :param node: Node dictionary
+
+    :type action: string
+    :type node: dictionary
+
+    :returns: Response object
+    :rtype: etcd.response.ResponseV2
+    """
 
     def __init__(self, action, node):
-        """
-        :param action: Action type
-        :param node: Node dictionary
-
-        :type action: string
-        :type node: dictionary
-
-        :returns: Response object
-        :rtype: etcd.response.ResponseV2
-        """
-
         self.action = action
         self.raw_node = node
         self.created_index = node['createdIndex']
@@ -204,22 +203,21 @@ class ResponseV2DeletedDirectoryNode(ResponseV2DirectoryNode):
 
 
 class ResponseV2(object):
-    "An object that describes a response for every V2 request."
+    """An object that describes a response for every V2 request.
+
+    :param response: Raw Requests response object
+    :param request_verb: Request verb ('get', post', 'put', etc..)
+    :param request_path: Node key
+
+    :type response: requests.models.Response
+    :type request_verb: string
+    :type request_path: string
+
+    :returns: Response object
+    :rtype: etcd.response.ResponseV2
+    """
 
     def __init__(self, response, request_verb, request_path):
-        """
-        :param response: Raw Requests response object
-        :param request_verb: Request verb ('get', post', 'put', etc..)
-        :param request_path: Node key
-
-        :type response: requests.models.Response
-        :type request_verb: string
-        :type request_path: string
-
-        :returns: Response object
-        :rtype: etcd.response.ResponseV2
-        """
-
         response_raw = response.json()
         self.node = _build_node_object(response_raw['action'], 
                                        response_raw['node'])

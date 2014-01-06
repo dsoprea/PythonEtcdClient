@@ -50,24 +50,22 @@ class _Modules(object):
 class Client(object):
     """The main channel of functionality for the client. Connects to the 
     server, and provides functions via properties.
+
+    :param hostname: Hostname of server
+    :param port: Port of server
+    :param scheme: URI scheme
+    :param debug: Whether to print debug verbosity (can be provided as the 
+                  ETCD_DEBUG environment variable, as well)
+
+    :type hostname: string
+    :type port: int
+    :type scheme: string
+    :type debug: bool
+
+    :raises: ValueError
     """
 
     def __init__(self, hostname=DEFAULT_HOSTNAME, port=DEFAULT_PORT, scheme=DEFAULT_SCHEME, debug=False):
-        """Set the given node.
-
-        :param hostname: Hostname of server
-        :param port: Port of server
-        :param scheme: URI scheme
-        :param debug: Whether to print debug verbosity (can be provided as the ETCD_DEBUG environment variable, as well)
-
-        :type hostname: string
-        :type port: int
-        :type scheme: string
-        :type debug: bool
-
-        :raises: ValueError
-        """
-
         debug_override = environ.get('ETCD_DEBUG')
         if debug_override is not None and debug_override == 'true':
             debug = True
@@ -93,6 +91,12 @@ class Client(object):
         return ('<ETCD %s>' % (self.__prefix))
 
     def debug(self, message):
+        """Print a debug message during debug mode.
+
+        :param message: Message to print
+        :type message: string
+        """
+
         if self.__debug is True:
             print("EC: %s" % (message))
 
