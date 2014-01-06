@@ -228,7 +228,7 @@ class Client(object):
         """Return an instance of the class that hosts the functionality 
         provided by individual modules.
 
-        :rtype: :class:`_Modules`
+        :rtype: :class:`etcd.client._Modules`
         """
 
         try:
