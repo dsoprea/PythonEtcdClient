@@ -58,8 +58,7 @@ class Client(object):
         :param hostname: Hostname of server
         :param port: Port of server
         :param scheme: URI scheme
-        :param debug: Whether to print debug verbosity (can be provided as the 
-                      ETCD_DEBUG environment variable, as well)
+        :param debug: Whether to print debug verbosity (can be provided as the ETCD_DEBUG environment variable, as well)
 
         :type hostname: string
         :type port: int
