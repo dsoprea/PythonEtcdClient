@@ -22,7 +22,7 @@ class NodeOps(CommonOps):
         :type recursive: bool
 
         :returns: Response object
-        :rtype: :class:`etcd.response.ResponseV2`
+        :rtype: :class:etcd.response.ResponseV2
 
         :raises: KeyError
         """
