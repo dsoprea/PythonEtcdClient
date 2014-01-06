@@ -1,10 +1,10 @@
-.. etcd documentation master file, created by
-   sphinx-quickstart on Sun Jan  5 21:43:37 2014.
+.. . documentation master file, created by
+   sphinx-quickstart on Sun Jan  5 21:48:32 2014.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to etcd's documentation!
-================================
+Welcome to .'s documentation!
+=============================
 
 Contents:
 
