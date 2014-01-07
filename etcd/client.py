@@ -81,11 +81,13 @@ class Client(object):
 
 # TODO: Remove the version check after debugging.
 # TODO: Can we implicitly read the version from the response/headers?
-        self.__version = self.server.get_version()
-        self.debug("Version: %s" % (self.__version))
+#        self.__version = self.server.get_version()
+#        self.debug("Version: %s" % (self.__version))
+#
+#        if self.__version.startswith('0.2') is False:
+#            raise ValueError("We don't support an etcd version older than 0.2.0 .")
 
-        if self.__version.startswith('0.2') is False:
-            raise ValueError("We don't support an etcd version older than 0.2.0 .")
+#        self.__machines = [() for () in self.server.get_machines()]
 
     def __str__(self):
         return ('<ETCD %s>' % (self.__prefix))
