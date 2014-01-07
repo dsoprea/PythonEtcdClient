@@ -68,10 +68,9 @@ class Client(object):
     :raises: ValueError
     """
 
-    def __init__(self, hostname=DEFAULT_HOSTNAME, port=DEFAULT_PORT, scheme=DEFAULT_SCHEME, debug=False):
-        debug_override = environ.get('ETCD_DEBUG')
-        if debug_override is not None and debug_override == 'true':
-            debug = True
+    def __init__(self, hostname=DEFAULT_HOSTNAME, port=DEFAULT_PORT, scheme=DEFAULT_SCHEME, debug=None):
+        if debug is None:
+            debug = bool(int(environ.get('PEC_DEBUG', '0')))
 
         self.__debug = debug
 
@@ -79,8 +78,13 @@ class Client(object):
         self.__port = port
         self.__scheme = scheme
 
+        self.__ssl_verify = None
+        self.__ssl_cert = None
+
         self.__prefix = ('%s://%s:%s' % (scheme, hostname, port))
         self.debug("PREFIX= [%s]" % (self.__prefix))
+
+        self.__collect_ssl_config()
 
 # TODO: Remove the version check after debugging.
 # TODO: Can we implicitly read the version from the response/headers?
@@ -119,6 +123,37 @@ class Client(object):
     def __str__(self):
         return ('<ETCD %s>' % (self.__prefix))
 
+    def __collect_ssl_config(self):
+        verify = None
+        cert = None
+
+        # :param verify: (forwarded to Requests) if ``True``, the SSL cert will be verified. A CA_BUNDLE path can also be provided.
+        # :param cert: (forwarded to Requests) if String, path to ssl client cert file (.pem). If Tuple, ('cert', 'key') pair.
+
+        verify = environ.get('PEC_SSL_DO_VERIFY')
+        ca_bundle_filepath = environ.get('PEC_SSL_CA_BUNDLE_FILEPATH')
+        if verify is not None:
+            verify = bool(int(verify))
+        elif ca_bundle_filepath is not None:
+            verify = ca_bundle_filepath
+        else:
+            verify = True
+
+        cert = None
+        client_cert_filepath = environ.get('PEC_SSL_CLIENT_CERT_FILEPATH')
+        if client_cert_filepath is not None:
+            client_key_filepath = environ.get('PEC_SSL_CLIENT_KEY_FILEPATH')
+            if client_key_filepath is not None:
+                cert = (client_cert_filepath, client_key_filepath)
+            else:
+                cert = client_cert_filepath
+
+        if verify is not None or cert is not None:
+            self.debug("SSL: verify=[%s] cert=[%s]" % (verify, cert))
+
+        self.__ssl_verify = verify
+        self.__ssl_cert = cert
+
     def debug(self, message):
         """Print a debug message during debug mode.
 
@@ -144,6 +179,8 @@ class Client(object):
         :param return_raw: Whether to return a 
                            :class:`etcd.response.ResponseV2` object or the raw 
                            Requests response.
+        :param allow_reconnect: Allow the client to consider alternate hosts if
+                                the current host fails connection.
 
         :type version: int
         :type verb: string
@@ -153,6 +190,7 @@ class Client(object):
         :type data: dictionary or None
         :type module: string or None
         :type return_raw: bool
+        :type allow_reconnect: bool
 
         :returns: Response object
         :rtype: :class:`etcd.response.ResponseV2`
@@ -180,7 +218,10 @@ class Client(object):
         if value is not None:
             data['value'] = value
 
-        args = { 'params': parameters, 'data': data }
+        args = { 'params': parameters, 
+                 'data': data, 
+                 'verify': self.__ssl_verify, 
+                 'cert': self.__ssl_cert }
 
         self.debug("Request(%s)=[%s] params=[%s] data_keys=[%s]" % 
                    (verb, url, parameters, args['data'].keys()))
