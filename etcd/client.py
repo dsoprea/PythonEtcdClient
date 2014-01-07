@@ -1,8 +1,11 @@
 import requests
 
 from os import environ
+from requests.exceptions import ConnectionError
+from datetime import datetime
 
-from etcd.config import DEFAULT_HOSTNAME, DEFAULT_PORT, DEFAULT_SCHEME
+from etcd.config import DEFAULT_HOSTNAME, DEFAULT_PORT, DEFAULT_SCHEME, \
+                        HOST_FAIL_WAIT_S
 from etcd.directory_ops import DirectoryOps
 from etcd.node_ops import NodeOps
 from etcd.server_ops import ServerOps
@@ -87,7 +90,31 @@ class Client(object):
 #        if self.__version.startswith('0.2') is False:
 #            raise ValueError("We don't support an etcd version older than 0.2.0 .")
 
-#        self.__machines = [() for () in self.server.get_machines()]
+        self.__machines = [[dict(machine_info)['etcd'], None]
+                            for machine_info
+                            in self.server.get_machines()]
+
+        self.debug("Cluster machines: %s" % (self.__machines))
+
+        # This will fail if the given server does appear in the published list 
+        # of servers. This might only happen because of a hostname being used 
+        # instead of an IP, or vice-versa.
+        self.__machine_index = None
+        i = 0
+        for (prefix, last_fail_dt) in self.__machines:
+            if prefix == self.__prefix:
+                self.__machine_index = i
+                break
+
+            i += 1
+
+        if self.__machine_index is None:
+            raise ValueError("Could not identify given prefix [%s] among "
+                             "published prefixes: %s" % 
+                             (self.__prefix, self.__machines))
+
+        self.debug("The initial machine is at index (%d)." % 
+                   (self.__machine_index))
 
     def __str__(self):
         return ('<ETCD %s>' % (self.__prefix))
@@ -102,7 +129,8 @@ class Client(object):
         if self.__debug is True:
             print("EC: %s" % (message))
 
-    def send(self, version, verb, path, value=None, parameters=None, data=None, module=None, return_raw=False):
+    def send(self, version, verb, path, value=None, parameters=None, data=None, 
+             module=None, return_raw=False, allow_reconnect=True):
         """Build and execute a request.
 
         :param version: Version of API
@@ -157,7 +185,47 @@ class Client(object):
         self.debug("Request(%s)=[%s] params=[%s] data_keys=[%s]" % 
                    (verb, url, parameters, args['data'].keys()))
 
-        r = send(url, **args)
+        while 1:
+            try:
+                r = send(url, **args)
+            except ConnectionError as e:
+                self.debug("Connection error with [%s] [%s]: %s" % 
+                           (self.__prefix, e.__class__.__name__, str(e)))
+
+                if allow_reconnect is False:
+                    raise
+            else:
+                break
+
+            # If we get here, there was a connection problem. Rotate the server 
+            # that we're using, excluding any that have recently failed.
+
+            now_dt = datetime.now()
+            self.__machines[self.__machine_index][1] = now_dt
+
+            len_ = len(self.__machines)
+            i = 0
+            elected = None
+            while i < len_:
+                machine_index = (self.__machine_index + 1) % len_
+                (prefix, last_fail_dt) = self.__machines[machine_index]
+
+                if last_fail_dt is None or \
+                   (now_dt - last_fail_dt).total_seconds() > \
+                        HOST_FAIL_WAIT_S:
+                    elected = prefix
+
+                i += 1
+
+            if elected is None:
+                raise SystemError("All servers have failed: %s" % 
+                                  (self.__machines,))
+
+            self.__prefix = elected
+            self.__machine_index = machine_index
+
+            self.debug("Retrying with next machine: %s" % (self.__prefix))
+
         r.raise_for_status()
 
         if return_raw is True:

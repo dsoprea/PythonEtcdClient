@@ -6,3 +6,6 @@ DEFAULT_PORT = 4001
 
 DEFAULT_SCHEME = 'http'
 "Default scheme for server."
+
+HOST_FAIL_WAIT_S = 5
+"Number of seconds that must elapse before we're allowed to retry a host."

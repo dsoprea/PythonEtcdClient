@@ -245,23 +245,11 @@ print(r)
 Enumerate the prefixes of the hosts in the cluster:
 
 ```python
-from urlparse import parse_qsl
-
 machines = c.server.get_machines()
 
 print(machines)
-# Prints: <RESPONSE: <NODE(ResponseV2AliveDirectoryNode) [get] 
-#           [/_etcd/machines] IS_HID=[False] TTL=[None] IS_DIR=[True] 
-#           IS_COLL=[True] COUNT=[1] CI=(1) MI=(1)>>
-
-i = 0
-for machine in machines.node.children:
-    print("%d: %s" % (i, parse_qsl(machine.value)))
-    i += 1
-
-# Prints (this :
-# 0: [(u'etcd', u'http://127.0.0.1:4001'), 
-#     (u'raft', u'http://127.0.0.1:7001')]
+# Prints: [(u'etcd', u'http://127.0.0.1:4001'), 
+           (u'raft', u'http://127.0.0.1:7001')]
 ```
 
 Get URL of the dashboard for the server being connected-to:

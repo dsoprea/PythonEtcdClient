@@ -1,5 +1,7 @@
 import requests
 
+from urlparse import parse_qsl
+
 from etcd.common_ops import CommonOps
 from etcd.response import ResponseV2 
 
@@ -76,7 +78,10 @@ class ServerOps(CommonOps):
         """
 
         fq_path = self.get_fq_node_path('/_etcd/machines')
-        return self.__client.send(2, 'get', fq_path)
+        response = self.__client.send(2, 'get', fq_path, allow_reconnect=False)
+
+        for machine in response.node.children:
+            yield parse_qsl(machine.value)
 
     def get_dashboard_url(self):
         """Return the URL for the dashboard on the server currently connected-
