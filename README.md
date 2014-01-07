@@ -249,7 +249,7 @@ machines = c.server.get_machines()
 
 print(machines)
 # Prints: [(u'etcd', u'http://127.0.0.1:4001'), 
-           (u'raft', u'http://127.0.0.1:7001')]
+#          (u'raft', u'http://127.0.0.1:7001')]
 ```
 
 Get URL of the dashboard for the server being connected-to:

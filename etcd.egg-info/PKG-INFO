@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: etcd
-Version: 1.1.5
+Version: 1.1.6
 Summary: A Python etcd client that just works.
 Home-page: https://github.com/dsoprea/PythonEtcdClient
 Author: Dustin Oprea
