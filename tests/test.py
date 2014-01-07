@@ -4,7 +4,9 @@ from etcd.client import Client
 
 c = Client()
 
-print(c)
+machines = c.server.get_machines()
+for machine in machines:
+    print(machine)
 
 print
 
