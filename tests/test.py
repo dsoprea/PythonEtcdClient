@@ -86,19 +86,10 @@ c = Client()
 #
 #print
 
-from time import sleep
-print("Sleeping")
-sleep(5)
-
-r = c.directory.delete_recursive('/queue_2302')
-print(r)
-
-exit(0)
-
-#r = c.node.set('/test_2056/val1', 5, ttl=60)
+#r = c.directory.delete_recursive('/queue_2302')
 #print(r)
 
-#print
+#exit(0)
 
 r = c.node.set('/test_2056/val1', 5, ttl=60)
 print(r)

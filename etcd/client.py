@@ -1,7 +1,10 @@
 import requests
+import ssl
 
 from os import environ
 from requests.exceptions import ConnectionError
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.poolmanager import PoolManager
 from datetime import datetime
 
 from etcd.config import DEFAULT_HOSTNAME, DEFAULT_PORT, DEFAULT_SCHEME, \
@@ -14,11 +17,24 @@ from etcd.modules.lock import LockMod
 from etcd.modules.leader import LeaderMod
 from etcd.response import ResponseV2
 
-# TODO: Add support for SSL: 
-#   curl --key ./fixtures/ca/server2.key.insecure --cert ./fixtures/ca/server2.crt --cacert ./fixtures/ca/server-chain.pem -L https://127.0.0.1:4001/v2/keys/foo -XPUT -d value=bar -v
+
+class _Ssl3HttpAdapter(HTTPAdapter):
+    """"Transport adapter" that allows us to use SSLv3."""
+
+    def init_poolmanager(self, connections, maxsize, block=False):
+        self.poolmanager = PoolManager(num_pools=connections,
+                                       maxsize=maxsize,
+                                       block=block,
+                                       ssl_version=ssl.PROTOCOL_SSLv3)
 
 
 class _Modules(object):
+    """Intermediate container that holds functionality related to modules.
+
+    :param client: Client instance
+    :type client: :class:`etcd.client.Client`
+    """
+
     def __init__(self, client):
         self.__client = client
 
@@ -85,6 +101,9 @@ class Client(object):
         self.debug("PREFIX= [%s]" % (self.__prefix))
 
         self.__collect_ssl_config()
+
+        self.__session = requests.Session()
+        self.__session.mount('https://', _Ssl3HttpAdapter())
 
 # TODO: Remove the version check after debugging.
 # TODO: Can we implicitly read the version from the response/headers?
@@ -208,8 +227,6 @@ class Client(object):
         else:
             response_cls = ResponseV2
 
-        send = getattr(requests, verb)
-
         if module is None:
             url = ('%s/v%d%s' % (self.__prefix, version, path))
         else:
@@ -226,6 +243,8 @@ class Client(object):
         self.debug("Request(%s)=[%s] params=[%s] data_keys=[%s]" % 
                    (verb, url, parameters, args['data'].keys()))
 
+        send = getattr(self.__session, verb)
+    
         while 1:
             try:
                 r = send(url, **args)

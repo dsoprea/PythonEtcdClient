@@ -1,3 +1,3 @@
 #!/bin/sh
 
-PYTHONPATH=..:~/build/requests-sslv3 python test.py
+PYTHONPATH=.. python test.py

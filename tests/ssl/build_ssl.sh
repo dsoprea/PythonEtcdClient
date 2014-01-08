@@ -1,12 +1,8 @@
 #!/bin/sh
 
-# Create CA.
-openssl genrsa -out rootCA.key 2048
-openssl req -x509 -new -nodes -key rootCA.key -days 1024 -out rootCA.pem
-
 # Create server certs.
-openssl genrsa -out server.key 2048
-openssl req -new -key server.key -out server.csr
+openssl genrsa -out etcd.local.key 2048
+openssl req -new -key etcd.local.key -out etcd.local.csr
 
 # Sign server certs.
-openssl x509 -req -in server.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out server.crt -days 500
+openssl x509 -req -in etcd.local.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out etcd.local.crt -days 500
