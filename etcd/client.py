@@ -113,6 +113,10 @@ class Client(object):
 #        if self.__version.startswith('0.2') is False:
 #            raise ValueError("We don't support an etcd version older than 0.2.0 .")
 
+# TODO: There's currently a bug where server hostnames are not published. 
+#       Therefore, when we're given a hostname with which to connect, we'll 
+#       crash when it's not found in the list of published hosts (which only 
+#       have IPs).
         self.__machines = [[dict(machine_info)['etcd'], None]
                             for machine_info
                             in self.server.get_machines()]
