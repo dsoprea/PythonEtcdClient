@@ -7,8 +7,7 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.poolmanager import PoolManager
 from datetime import datetime
 
-from etcd.config import DEFAULT_HOSTNAME, DEFAULT_PORT, DEFAULT_SCHEME, \
-                        HOST_FAIL_WAIT_S
+from etcd.config import HOST_FAIL_WAIT_S
 from etcd.directory_ops import DirectoryOps
 from etcd.node_ops import NodeOps
 from etcd.server_ops import ServerOps
@@ -75,25 +74,39 @@ class Client(object):
     :param scheme: URI scheme
     :param debug: Whether to print debug verbosity (can be provided as the 
                   ETCD_DEBUG environment variable, as well)
+    :param ssl_do_verify: Whether to verify the certificate hostname.
+    :param ssl_ca_bundle_filepath: A bundle of rootCAs for verifications.
+    :param ssl_client_cert_filepath: A client certificate, for authentication.
+    :param ssl_client_key_filepath: A client key, for authentication.
 
     :type hostname: string
     :type port: int
     :type scheme: string
     :type debug: bool
+    :type ssl_do_verify: bool or None
+    :type ssl_ca_bundle_filepath: string or None
+    :type ssl_client_cert_filepath: string or None
+    :type ssl_client_key_filepath: string or None
 
     :raises: ValueError
     """
 
-    def __init__(self, hostname=DEFAULT_HOSTNAME, port=DEFAULT_PORT, scheme=DEFAULT_SCHEME, debug=None):
+    def __init__(self, hostname='127.0.0.1', port=4001, 
+                 scheme='http', debug=None, ssl_do_verify=None, 
+                 ssl_ca_bundle_filepath=None, ssl_client_cert_filepath=None,
+                 ssl_client_key_filepath=None):
         if debug is None:
             debug = bool(int(environ.get('PEC_DEBUG', '0')))
 
         self.__debug = debug
 
-        self.__hostname = hostname
-        self.__port = port
-        self.__scheme = scheme
+        # These are set from the parameters.
+        self.__ssl_config_do_verify = ssl_do_verify
+        self.__ssl_config_ca_bundle_filepath = ssl_ca_bundle_filepath
+        self.__ssl_config_client_cert_filepath = ssl_client_cert_filepath
+        self.__ssl_config_client_key_filepath = ssl_client_key_filepath
 
+        # These are set from the processing of SSL configuration.
         self.__ssl_verify = None
         self.__ssl_cert = None
 
@@ -113,11 +126,6 @@ class Client(object):
 #        if self.__version.startswith('0.2') is False:
 #            raise ValueError("We don't support an etcd version older than 0.2.0 .")
 
-# TODO: There's currently a bug where server hostnames are not published. 
-#	https://github.com/coreos/etcd/issues/456
-#       Therefore, when we're given a hostname with which to connect, we'll 
-#       crash when it's not found in the list of published hosts (which only 
-#       have IPs).
         self.__machines = [[dict(machine_info)['etcd'], None]
                             for machine_info
                             in self.server.get_machines()]
@@ -151,11 +159,16 @@ class Client(object):
         verify = None
         cert = None
 
-        # :param verify: (forwarded to Requests) if ``True``, the SSL cert will be verified. A CA_BUNDLE path can also be provided.
-        # :param cert: (forwarded to Requests) if String, path to ssl client cert file (.pem). If Tuple, ('cert', 'key') pair.
+        if self.__ssl_config_do_verify is not None:
+            verify = 1 if self.__ssl_config_do_verify is True else 0
+        else:
+            verify = environ.get('PEC_SSL_DO_VERIFY')
+            
+        if self.__ssl_config_ca_bundle_filepath is not None:
+            ca_bundle_filepath = self.__ssl_config_ca_bundle_filepath
+        else:
+            ca_bundle_filepath = environ.get('PEC_SSL_CA_BUNDLE_FILEPATH')
 
-        verify = environ.get('PEC_SSL_DO_VERIFY')
-        ca_bundle_filepath = environ.get('PEC_SSL_CA_BUNDLE_FILEPATH')
         if verify is not None:
             verify = bool(int(verify))
         elif ca_bundle_filepath is not None:
@@ -164,9 +177,18 @@ class Client(object):
             verify = True
 
         cert = None
-        client_cert_filepath = environ.get('PEC_SSL_CLIENT_CERT_FILEPATH')
+        if self.__ssl_config_client_cert_filepath is not None:
+            client_cert_filepath = self.__ssl_config_client_cert_filepath
+        else:
+            client_cert_filepath = environ.get('PEC_SSL_CLIENT_CERT_FILEPATH')
+        
         if client_cert_filepath is not None:
-            client_key_filepath = environ.get('PEC_SSL_CLIENT_KEY_FILEPATH')
+            if self.__ssl_config_client_key_filepath is not None:
+                client_key_filepath = self.__ssl_config_client_key_filepath
+            else:
+                client_key_filepath = environ.get(
+                                        'PEC_SSL_CLIENT_KEY_FILEPATH')
+            
             if client_key_filepath is not None:
                 cert = (client_cert_filepath, client_key_filepath)
             else:
