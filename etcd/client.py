@@ -69,9 +69,9 @@ class Client(object):
     """The main channel of functionality for the client. Connects to the 
     server, and provides functions via properties.
 
-    :param hostname: Hostname of server
+    :param host: Hostname or IP of server
     :param port: Port of server
-    :param scheme: URI scheme
+    :param is_ssl: Whether to use 'http://' or 'https://'.
     :param debug: Whether to print debug verbosity (can be provided as the 
                   ETCD_DEBUG environment variable, as well)
     :param ssl_do_verify: Whether to verify the certificate hostname.
@@ -79,9 +79,9 @@ class Client(object):
     :param ssl_client_cert_filepath: A client certificate, for authentication.
     :param ssl_client_key_filepath: A client key, for authentication.
 
-    :type hostname: string
+    :type host: string
     :type port: int
-    :type scheme: string
+    :type is_ssl: bool
     :type debug: bool
     :type ssl_do_verify: bool or None
     :type ssl_ca_bundle_filepath: string or None
@@ -91,8 +91,8 @@ class Client(object):
     :raises: ValueError
     """
 
-    def __init__(self, hostname='127.0.0.1', port=4001, 
-                 scheme='http', debug=None, ssl_do_verify=None, 
+    def __init__(self, host='127.0.0.1', port=4001, 
+                 is_ssl=False, debug=None, ssl_do_verify=None, 
                  ssl_ca_bundle_filepath=None, ssl_client_cert_filepath=None,
                  ssl_client_key_filepath=None):
         if debug is None:
@@ -110,7 +110,8 @@ class Client(object):
         self.__ssl_verify = None
         self.__ssl_cert = None
 
-        self.__prefix = ('%s://%s:%s' % (scheme, hostname, port))
+        scheme = 'http' if is_ssl is False else 'https'
+        self.__prefix = ('%s://%s:%s' % (scheme, host, port))
         self.debug("PREFIX= [%s]" % (self.__prefix))
 
         self.__collect_ssl_config()

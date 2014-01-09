@@ -2,7 +2,7 @@ from sys import exit
 
 from etcd.client import Client
 
-c = Client(hostname='etcd.local', scheme='https', ssl_ca_bundle_filepath='ssl/rootCA.pem')
+c = Client(host='etcd.local', is_ssl=True, ssl_ca_bundle_filepath='ssl/rootCA.pem')
 
 #machines = c.server.get_machines()
 #for machine in machines:

@@ -30,6 +30,22 @@ print(r.node.value)
 # Displays "5".
 ```
 
+
+SSL
+---
+*PEC* also allows for SSL authentication and encrypted communication.
+
+To use it for communication, pass the hostname as the *host* parameter and a 
+*is_ssl* of *True*. If you need to pass a bundle of CA certificates (for less 
+well-known root authorities), pass *ssl_ca_bundle_filepath*.
+
+```python
+c = Client(host='etcd.local', 
+           is_ssl=True, 
+           ssl_ca_bundle_filepath='ssl/rootCA.pem')
+```
+
+
 General Functions
 -----------------
 
