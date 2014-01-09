@@ -12,7 +12,9 @@ c = Client()
 #
 #exit(0)
 
-#print(c.server.get_version())
+print(c.server.get_version())
+
+exit(0)
 #print(c.server.get_leader_url_prefix())
 #for machine in c.server.get_machines().node.children:
 #    print(machine.value)

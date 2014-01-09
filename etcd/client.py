@@ -114,6 +114,7 @@ class Client(object):
 #            raise ValueError("We don't support an etcd version older than 0.2.0 .")
 
 # TODO: There's currently a bug where server hostnames are not published. 
+#	https://github.com/coreos/etcd/issues/456
 #       Therefore, when we're given a hostname with which to connect, we'll 
 #       crash when it's not found in the list of published hosts (which only 
 #       have IPs).
@@ -296,6 +297,10 @@ class Client(object):
             return r
 
         return response_cls(r, verb, path)
+
+    @property
+    def session(self):
+        return self.__session
 
     @property
     def prefix(self):

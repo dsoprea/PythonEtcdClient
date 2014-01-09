@@ -37,8 +37,8 @@ class ServerOps(CommonOps):
             url = ('%s%s' % (self.__client.prefix, path))
 
         self.__client.debug("TEXT URL (%s) = [%s]" % (reason, url))
-# TODO: This has to use the SSL session.
-        r = requests.get(url)
+
+        r = self.__client.session.get(url)
         r.raise_for_status()
 
         return r.text
