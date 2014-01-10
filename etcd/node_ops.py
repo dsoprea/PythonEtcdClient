@@ -8,7 +8,7 @@ from etcd.response import ResponseV2
 
 class NodeOps(CommonOps):
     """Common key-value functions."""
-
+# TODO: Add doc for constructor.
     def __init__(self, client):
         self.__client = client
 
@@ -70,7 +70,7 @@ class NodeOps(CommonOps):
             data['ttl'] = ttl
 
         return self.__client.send(2, 'put', fq_path, value, data=data)
-
+# TODO: Doc this in README.
     def wait(self, path, recursive=False):
         """Long-poll on the given path until it changes.
 
