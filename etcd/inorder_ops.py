@@ -39,7 +39,6 @@ class _InOrder(object):
         """
 
         parameters = {}
-# TODO: What does "recursive" do when sent with a GET on a queue.
         if sorted is True:
             parameters['sorted'] = 'true'
 
