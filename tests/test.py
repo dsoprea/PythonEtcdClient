@@ -2,7 +2,13 @@ from sys import exit
 
 from etcd.client import Client
 
-c = Client(host='etcd.local', is_ssl=True, ssl_ca_bundle_filepath='ssl/rootCA.pem')
+c = Client(host='etcd.local', 
+           is_ssl=True, 
+           ssl_ca_bundle_filepath='/home/dustin/development/python/etcd/tests/ssl/rootCA.pem')
+#           ssl_client_cert_filepath='/home/dustin/development/python/etcd/tests/ssl/client.crt', 
+#           ssl_client_key_filepath='/home/dustin/development/python/etcd/tests/ssl/client.key')
+#           ssl_client_cert_filepath='/home/dustin/development/python/etcd/tests/ssl/cert_2_newca/alien_client.crt', 
+#           ssl_client_key_filepath='/home/dustin/development/python/etcd/tests/ssl/cert_2_newca/alien_client.key')
 
 #machines = c.server.get_machines()
 #for machine in machines:
