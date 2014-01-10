@@ -92,7 +92,9 @@ print(r.node.value)
 ```
 
 In this case, a set with a value of (20) was performed from another terminal, 
-and we were given the same exact response that they got.
+and we were given the same exact response that they got. We can set the 
+'recursive' parameter to *True* to watch subdirectories and subdirectories-of-
+subdirectories as well.
 
 Get children:
 
