@@ -71,11 +71,28 @@ r = c.node.get('/node_test/subkey1')
 print(r)
 # Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [get] [/node_test/subkey1] 
 #           IS_HID=[False] IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] 
-#           TTL=[None] CI=(5) MI=(5)>>
+#           TTL=[None] CI=(4) MI=(4)>>
 
 print(r.node.value)
 # Prints "5"
 ```
+
+Wait for a change to a specific node:
+
+```python
+r = c.node.wait('/node_test/subkey1')
+
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2AliveNode) [set] [/node_test/subkey1] 
+#           IS_HID=[False] IS_DEL=[False] IS_DIR=[False] IS_COLL=[False] 
+#           TTL=[None] CI=(5) MI=(5)>>
+
+print(r.node.value)
+# Prints "20"
+```
+
+In this case, a set with a value of (20) was performed from another terminal, 
+and we were given the same exact response that they got.
 
 Get children:
 
