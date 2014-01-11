@@ -21,7 +21,13 @@ c = Client()
 #
 #exit(0)
 
-r = c.node.set('/node_test/subkey1', 20)
+r = c.node.get('/node_test/subkey1')
+print(r)
+
+r = c.node.wait('/node_test/subkey1')
+print(r)
+
+print(r.node.value)
 
 exit(0)
 
