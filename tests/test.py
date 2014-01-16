@@ -1,15 +1,18 @@
 from sys import exit
+from os.path import join
 
 from etcd.client import Client
 
 #           ssl_ca_bundle_filepath='/home/dustin/development/python/etcd/tests/ssl/rootCA.pem')
 
-c = Client()
+#c = Client()
 
-#c = Client(host='etcd.local', 
-#           is_ssl=True, 
-#           ssl_client_cert_filepath='/home/dustin/development/python/etcd/tests/ssl/client.crt', 
-#           ssl_client_key_filepath='/home/dustin/development/python/etcd/tests/ssl/client.key')
+ssl_root = '/home/dustin/development/python/etcd/tests/ssl'
+
+c = Client(host='etcd.local', 
+           is_ssl=True, 
+           ssl_client_cert_filepath=join(ssl_root, 'client.crt'), 
+           ssl_client_key_filepath=join(ssl_root, 'client.key'))
 #           ssl_client_cert_filepath='/home/dustin/development/python/etcd/tests/ssl/cert_2_newca/alien_client.crt', 
 #           ssl_client_key_filepath='/home/dustin/development/python/etcd/tests/ssl/cert_2_newca/alien_client.key')
 
