@@ -27,11 +27,15 @@ c = Client(host='127.0.0.1',#etcd.local',
 #
 #exit(0)
 
-#s = c.stat.get_leader_stats()
-s = c.stat.get_self_stats()
+print("LEADER")
 
-from pprint import pprint
-pprint(s)
+s = c.stat.get_leader_stats()
+print(s)
+
+print("SELF")
+
+s = c.stat.get_self_stats()
+print(s)
 
 exit(0)
 

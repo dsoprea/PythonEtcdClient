@@ -368,6 +368,35 @@ for child in r.node.children:
 ```
 
 
+Statistics Functions
+--------------------
+
+This functions provide access to the statistics information published by the 
+*etcd* hosts.
+
+```python
+s = c.stat.get_leader_stats()
+
+print(s)
+# Prints: (u'test01', {u'dustinlenovo': LStatFollower(counts=
+#         LStatCounts(fail=412, success=75214), latency=
+#         LStatLatency(average=7.201827094703149, current=0.535978, 
+#         maximum=350.543234, minimum=0.462994, 
+#         standard_deviation=22.639299448915402))})
+
+s = c.stat.get_self_stats()
+
+print(s)
+# Prints: SStat(leader_info=SStatLeader(leader=u'test01', 
+#         uptime=datetime.timedelta(0, 3971, 790306)), name=u'test01', 
+#         recv_append_request_cnt=0, send_append_request_cnt=75626, 
+#         send_bandwidth_rate=538.5960990745054, 
+#         send_pkg_rate=20.10061948402707, 
+#         start_time=datetime.datetime(2014, 2, 8, 16, 26, 13), 
+#         state=u'leader')
+```
+
+
 Locking Module Functions
 ------------------------
 

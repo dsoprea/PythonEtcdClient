@@ -15,8 +15,8 @@ class StatOps(CommonOps):
     def get_leader_stats(self):
         """Returns leader and follower information.
 
-        :returns: Tuple of (<leader_name>, { <follower 1>: <stats>, ...})
-        :rtype: tuple
+        :returns: Tuple of leader name and follower dictionary
+        :rtype: namedtuple
         """
         
         r = self.client.send(2, 'get', '/stats/leader', return_raw=True)
@@ -48,8 +48,8 @@ class StatOps(CommonOps):
     def get_self_stats(self):
         """Returns stats regarding the current node.
 
-        :returns: Statistics data
-        :rtype: dict
+        :returns: Statistics data for host
+        :rtype: namedtuple
         """
         
         r = self.client.send(2, 'get', '/stats/self', return_raw=True)
@@ -64,15 +64,36 @@ class StatOps(CommonOps):
         L = namedtuple('SStatLeader', ['leader', 'uptime'])
 
         leader_info_raw = data['leaderInfo']
+
+        hours = 0
+        minutes = 0
+        seconds = 0
         
-        match = re.match('([0-9]+)m([0-9]+\.[0-9]+)s', 
+        match = re.match('([0-9]+)h([0-9]+)m([0-9]+\.[0-9]+)s', 
                          leader_info_raw['uptime'])
-        
-        if match is None:
-            raise ValueError("Could not understand leader-uptime value: %s" % 
-                             (leader_info_raw['uptime']))
-        
-        uptime = int(match.group(1)) * 60 + float(match.group(2))
+
+        if match is not None:
+            hours = int(match.group(1))
+            minutes = int(match.group(2))
+            seconds = float(match.group(3))
+        else:
+            match = re.match('([0-9]+)m([0-9]+\.[0-9]+)s', 
+                             leader_info_raw['uptime'])
+            
+            if match is not None:
+                minutes = int(match.group(1))
+                seconds = float(match.group(2))
+            else:
+                match = re.match('([0-9]+\.[0-9]+)s', 
+                                 leader_info_raw['uptime'])
+                
+                if match is None:
+                    raise ValueError("Could not understand leader-uptime value: %s" % 
+                                     (leader_info_raw['uptime']))
+
+                seconds = float(match.group(1))
+
+        uptime = hours * 3600 + minutes * 60 + seconds
         leader_info = L(leader=leader_info_raw['leader'], 
                         uptime=timedelta(seconds=uptime))
 
