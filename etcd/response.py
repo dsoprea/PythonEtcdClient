@@ -5,6 +5,8 @@ from os.path import basename
 from pytz import timezone
 from datetime import datetime, timedelta
 
+A__PREVNODE = '_(pnode)'
+
 A_GET = 'get'
 A_SET = 'set'
 A_UPDATE = 'update'
@@ -224,5 +226,17 @@ class ResponseV2(object):
         self.node = _build_node_object(response_raw['action'], 
                                        response_raw['node'])
 
+        # We have to fake the action (since we don't know what the last actual 
+        # was), but we can reasonably assume it was a SET action (it doesn't 
+        # really matter, as long as it's not a DELETE/CAD action).
+# TODO: We're assuming that the 'dir' flag will be set, in prevNode, when 
+#       appropriate.
+        if 'prevNode' in response_raw:
+            self.prev_node = _build_node_object(A__PREVNODE, 
+                                                response_raw['prevNode'])
+        else:
+            self.prev_node = None
+
     def __repr__(self):
         return ('<RESPONSE: %s>' % (self.node))
+

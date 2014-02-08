@@ -27,6 +27,12 @@ c = Client(host='127.0.0.1',#etcd.local',
 #
 #exit(0)
 
+r = c.node.set('/node_test/testkey', 'some_existing_value')
+print(r.node)
+print(r.prev_node)
+
+exit(0)
+
 try:
     r = c.directory.create('/dir_test/bb')
 except EtcdAlreadyExistsException:

@@ -28,6 +28,10 @@ r = c.node.get('/test/key')
 
 print(r.node.value)
 # Displays "5".
+
+r = c.node.set('/test/key', 10)
+print(r.prev_node.value)
+# Displays "5".
 ```
 
 
