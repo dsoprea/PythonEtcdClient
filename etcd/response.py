@@ -11,19 +11,20 @@ A_UPDATE = 'update'
 A_CREATE = 'create'
 A_DELETE = 'delete'
 A_CAS = 'compareAndSwap'
+A_CAD = 'compareAndDelete'
 
 def _build_node_object(action, node):
     if 'dir' not in node:
         node['dir'] = False
 
     if node['dir'] == True:
-        if action == A_DELETE:
+        if action in (A_DELETE, A_CAD):
             return ResponseV2DeletedDirectoryNode(action, node)
 # TODO: Specifically, what actions can happen for a DIRECTORY?
         else:
             return ResponseV2AliveDirectoryNode(action, node)
     else:
-        if action == A_DELETE:
+        if action in (A_DELETE, A_CAD):
             return ResponseV2DeletedNode(action, node)
 # TODO: Specifically, what actions can happen for a non-directory?
         else:
@@ -219,6 +220,7 @@ class ResponseV2(object):
 
     def __init__(self, response, request_verb, request_path):
         response_raw = response.json()
+
         self.node = _build_node_object(response_raw['action'], 
                                        response_raw['node'])
 

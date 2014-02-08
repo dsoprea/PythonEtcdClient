@@ -12,7 +12,7 @@ class _InOrder(object):
     """
 
     def __init__(self, client, fq_path):
-        self.__client = client
+        self.client = client
         self.__fq_path = fq_path
 
     def add(self, value):
@@ -26,7 +26,7 @@ class _InOrder(object):
         """
 
 # TODO: Can we send a TTL?
-        return self.__client.send(2, 'post', self.__fq_path, value=value)
+        return self.client.send(2, 'post', self.__fq_path, value=value)
 
     def list(self, sorted=True):
         """Return a list of the inserted nodes.
@@ -42,8 +42,8 @@ class _InOrder(object):
         if sorted is True:
             parameters['sorted'] = 'true'
 
-        return self.__client.send(2, 'get', self.__fq_path, 
-                                  parameters=parameters)
+        return self.client.send(2, 'get', self.__fq_path, 
+                                parameters=parameters)
 
 
 class InOrderOps(CommonOps):
@@ -52,9 +52,6 @@ class InOrderOps(CommonOps):
     :param client: Client instance
     :type client: :class:`etcd.client.Client`
     """
-
-    def __init__(self, client):
-        self.__client = client
 
     def get_inorder(self, path):
         """Get an instance of the in-order directory class for a specific key.
@@ -67,4 +64,4 @@ class InOrderOps(CommonOps):
         """
 
         fq_path = self.get_fq_node_path(path)
-        return _InOrder(self.__client, fq_path)
+        return _InOrder(self.client, fq_path)

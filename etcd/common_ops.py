@@ -1,5 +1,18 @@
+from requests.exceptions import HTTPError
+from requests.status_codes import codes
+
+from etcd.exceptions import EtcdPreconditionException
+
+
 class CommonOps(object):
-    """Base-class of 'ops' modules."""
+    """Base-class of 'ops' modules.
+
+    :param client: Client instance.
+    :type client: :class:`etcd.client.Client`
+    """
+
+    def __init__(self, client):
+        self.client = client
 
     def validate_path(self, path):
         """Validate the key that we were given.
@@ -23,3 +36,59 @@ class CommonOps(object):
         self.validate_path(path)
 
         return ('/keys' + path)
+
+    def compare_and_delete(self, path, is_dir, current_value=None, 
+                           current_index=None, is_recursive=None):
+        """The base compare-and-delete function for atomic deletes. A  
+        combination of criteria may be used if necessary.
+        
+        :param path: Key
+        :type path: string
+
+        :param is_dir: If the node is a directory
+        :type is_dir: bool
+
+        :param current_value: Current value to check
+        :type current_value: string or None
+
+        :param current_index: Current index to check
+        :type current_index: int or None
+
+        :returns: Response object
+        :rtype: :class:`etcd.response.ResponseV2`
+        """
+
+        fq_path = self.get_fq_node_path(path)
+
+        parameters = {}
+        data = { }
+
+        if current_value is not None:
+            data['prevValue'] = current_value
+
+        if current_index is not None:
+            data['prevIndex'] = current_index
+
+        if not data:
+            raise ValueError("CAD requires a comparison argument.")
+
+        if is_recursive is not None:
+            # Per the discussion, "-r will also imply -d".
+            is_dir = True
+
+            if is_recursive is True:
+                parameters['recursive'] = 'true'
+
+        parameters['dir'] = 'true' if is_dir is True else 'false'
+        
+
+        try:
+            return self.client.send(2, 'delete', fq_path, 
+                                    parameters=parameters,
+                                    data=data)
+        except HTTPError as e:
+            if e.response.status_code == codes.precondition_failed:
+                raise EtcdPreconditionException()
+
+            raise
+

@@ -3,3 +3,6 @@
 /lib
 /.Python
 /dist
+/local
+*.pyc
+

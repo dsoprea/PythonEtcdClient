@@ -8,17 +8,15 @@ from etcd.response import ResponseV2
 
 class NodeOps(CommonOps):
     """Common key-value functions."""
-# TODO: Add doc for constructor.
-    def __init__(self, client):
-        self.__client = client
 
     def get(self, path, recursive=False):
         """Get the given node.
 
         :param path: Node key
+        :type path: string
+
         :param recursive: Node is a directory, and we want to read it 
                           recursively.
-        :type path: string
         :type recursive: bool
 
         :returns: Response object
@@ -35,7 +33,7 @@ class NodeOps(CommonOps):
             parameters['recursive'] = 'true'
 
         try:
-            return self.__client.send(2, 'get', fq_path, parameters=parameters)
+            return self.client.send(2, 'get', fq_path, parameters=parameters)
         except HTTPError as e:
             if e.response.status_code == codes.not_found:
                 try:
@@ -52,11 +50,12 @@ class NodeOps(CommonOps):
         """Set the given node.
 
         :param path: Node key
-        :param value: Value to assign
-        :param ttl: Number of seconds until expiration
-
         :type path: string
+
+        :param value: Value to assign
         :type value: scalar
+
+        :param ttl: Number of seconds until expiration
         :type ttl: int or None
 
         :returns: Response object
@@ -69,16 +68,16 @@ class NodeOps(CommonOps):
         if ttl is not None:
             data['ttl'] = ttl
 
-        return self.__client.send(2, 'put', fq_path, value, data=data)
-# TODO: Doc this in README.
+        return self.client.send(2, 'put', fq_path, value, data=data)
+
     def wait(self, path, recursive=False):
         """Long-poll on the given path until it changes.
 
         :param path: Node key
+        :type path: string
+
         :param recursive: Wait on any change in the given directory or any of 
                           its descendants.
-
-        :type path: string
         :type recursive: bool
 
         :returns: Response object
@@ -95,27 +94,70 @@ class NodeOps(CommonOps):
             parameters['recursive'] = 'true'
 
         try:
-            return self.__client.send(2, 'get', fq_path, parameters=parameters)
+            return self.client.send(2, 'get', fq_path, parameters=parameters)
         except HTTPError as e:
             if e.response.status_code == codes.not_found:
                 raise KeyError(path)
 
             raise
 
-    def delete(self, path):
+    def delete(self, path, current_value=None, current_index=None):
         """Delete the given node.
 
         :param path: Node key
         :type path: string
 
+        :param current_value: Current value to check
+        :type current_value: string or None
+
+        :param current_index: Current index to check
+        :type current_index: int or None
+
         :returns: Response object
         :rtype: :class:`etcd.response.ResponseV2`
         """
 
+        if current_value is not None or current_index is not None:
+            return self.compare_and_delete(path, is_dir=False, 
+                                           current_value=current_value, 
+                                           current_index=current_index)
+
         fq_path = self.get_fq_node_path(path)
 # TODO: If this raises an error for an non-existent key, we'll have to 
 #       translate it to a KeyError.
-        return self.__client.send(2, 'delete', fq_path)
+        return self.client.send(2, 'delete', fq_path)
+
+    def delete_if_value(self, path, current_value):
+        """Only delete the given node if it's at the given value. 
+
+        :param path: Key
+        :type path: string
+
+        :param current_value: Current value to check
+        :type current_value: string
+
+        :returns: Response object
+        :rtype: :class:`etcd.response.ResponseV2`
+        """
+
+        return self.compare_and_delete(path, is_dir=False, 
+                                       current_value=current_value)
+
+    def delete_if_index(self, path, current_index):
+        """Only delete the given node if it's at the given index. 
+
+        :param path: Key
+        :type path: string
+
+        :param current_index: Current index to check
+        :type current_index: int or None
+
+        :returns: Response object
+        :rtype: :class:`etcd.response.ResponseV2`
+        """
+
+        return self.compare_and_delete(path, is_dir=False, 
+                                       current_index=current_index)
 
     def compare_and_swap(self, path, value, current_value=None, 
                          current_index=None, prev_exists=None, ttl=None):
@@ -123,17 +165,21 @@ class NodeOps(CommonOps):
         combination of criteria may be used if necessary.
 
         :param path: Node key
-        :param value: Value to assign
-        :param current_value: Current value to check
-        :param current_index: Current index to check
-        :param prev_exists: Whether the node should exist or not
-        :param ttl: The number of seconds until the node expires
-
         :type path: string
+
+        :param value: Value to assign
         :type value: scalar
+
+        :param current_value: Current value to check
         :type current_value: scalar or None
+
+        :param current_index: Current index to check
         :type current_index: int or None
+
+        :param prev_exists: Whether the node should exist or not
         :type prev_exists: bool or None
+
+        :param ttl: The number of seconds until the node expires
         :type ttl: int or None
 
         :returns: Response object
@@ -164,8 +210,8 @@ class NodeOps(CommonOps):
             data['ttl'] = ttl
 
         try:
-            return self.__client.send(2, 'put', fq_path, value, data=data, 
-                                      parameters=parameters)
+            return self.client.send(2, 'put', fq_path, value, data=data, 
+                                    parameters=parameters)
         except HTTPError as e:
             if e.response.status_code == codes.precondition_failed:
                 raise EtcdPreconditionException()
@@ -177,11 +223,12 @@ class NodeOps(CommonOps):
         already exist.
 
         :param path: Node key
-        :param value: Value to assign
-        :param ttl: The number of seconds until the node expires
-
         :type path: string
+
+        :param value: Value to assign
         :type value: scalar
+
+        :param ttl: The number of seconds until the node expires
         :type ttl: int or None
 
         :returns: Response object
@@ -196,11 +243,12 @@ class NodeOps(CommonOps):
         exists.
 
         :param path: Node key
-        :param value: Value to assign
-        :param ttl: The number of seconds until the node expires
-
         :type path: string
+
+        :param value: Value to assign
         :type value: scalar
+
+        :param ttl: The number of seconds until the node expires
         :type ttl: int or None
 
         :returns: Response object
@@ -215,13 +263,15 @@ class NodeOps(CommonOps):
         "modified index" matches.
 
         :param path: Node key
-        :param value: Value to assign
-        :param current_index: Current index to check
-        :param ttl: The number of seconds until the node expires
-
         :type path: string
+
+        :param value: Value to assign
         :type value: scalar
+
+        :param current_index: Current index to check
         :type current_index: int
+
+        :param ttl: The number of seconds until the node expires
         :type ttl: int or None
 
         :returns: Response object
@@ -236,13 +286,15 @@ class NodeOps(CommonOps):
         matches.
 
         :param path: Node key
-        :param value: Value to assign
-        :param current_value: Current value to check
-        :param ttl: The number of seconds until the node expires
-
         :type path: string
+
+        :param value: Value to assign
         :type value: scalar
+
+        :param current_value: Current value to check
         :type current_value: scalar or None
+
+        :param ttl: The number of seconds until the node expires
         :type ttl: int or None
 
         :returns: Response object

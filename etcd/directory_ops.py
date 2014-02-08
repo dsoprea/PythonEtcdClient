@@ -1,15 +1,13 @@
+from requests.exceptions import HTTPError
+from requests.status_codes import codes
+
+from etcd.exceptions import EtcdAlreadyExistsException
 from etcd.common_ops import CommonOps
 
 
 class DirectoryOps(CommonOps):
     """Functions specific to directory management.
-
-    :param client: Client instance.
-    :type client: :class:`etcd.client.Client`
     """
-
-    def __init__(self, client):
-        self.__client = client
 
     def create(self, path, ttl=None):
         """A normal node-set will implicitly create directories on the way to 
@@ -17,13 +15,14 @@ class DirectoryOps(CommonOps):
         create one.
 
         :param path: Key
-        :param ttl: Time until removed
-
         :type path: string
+
+        :param ttl: Time until removed
         :type ttl: int or None
 
         :returns: Response object
         :rtype: :class:`etcd.response.ResponseV2`
+        :raises: EtcdAlreadyExistsException
         """
 
         fq_path = self.get_fq_node_path(path)
@@ -32,37 +31,97 @@ class DirectoryOps(CommonOps):
         if ttl is not None:
             data['ttl'] = ttl
 
-        return self.__client.send(2, 'put', fq_path, data=data)
+        try:
+            return self.client.send(2, 'put', fq_path, data=data)
+        except HTTPError as e:
+            if e.response.status_code == codes.forbidden:
+                try:
+                    j = e.response.json()
+                except ValueError:
+                    pass
+                else:
+# TODO(dustin): Complain about this error message.
+                    # "message" == "Not a file"
+                    if j['errorCode'] == 102:
+                        raise EtcdAlreadyExistsException(path)
 
-    def delete(self, path):
+            raise
+
+    def delete(self, path, current_value=None, current_index=None):
         """Delete the given directory. It must be empty.
 
         :param path: Key
         :type path: string
 
+        :param current_index: Current index to check
+        :type current_index: int or None
+
         :returns: Response object
         :rtype: :class:`etcd.response.ResponseV2`
         """
+
+        if current_index is not None:
+            return self.compare_and_delete(path, is_dir=True, 
+                                           current_index=current_index)
 
         fq_path = self.get_fq_node_path(path)
 
         parameters = { 'dir': 'true' }
-        return self.__client.send(2, 'delete', fq_path, parameters=parameters)
+        return self.client.send(2, 'delete', fq_path, parameters=parameters)
 
-    def delete_recursive(self, path):
-        """Delete the given directory, along with any children.
+    def delete_if_index(self, path, current_index):
+        """Only delete the given directory if the node is at the given index. 
+        It must be empty.
 
         :param path: Key
-        :param ttl: Time until removed
-
         :type path: string
-        :type ttl: int or None
+
+        :param current_index: Current index to check
+        :type current_index: int or None
 
         :returns: Response object
         :rtype: :class:`etcd.response.ResponseV2`
         """
 
+        return self.compare_and_delete(path, is_dir=True, 
+                                       current_index=current_index)
+
+    def delete_recursive(self, path, current_index=None):
+        """Delete the given directory, along with any children.
+
+        :param path: Key
+        :type path: string
+
+        :param current_index: Current index to check
+        :type current_index: int or None
+
+        :returns: Response object
+        :rtype: :class:`etcd.response.ResponseV2`
+        """
+
+        if current_value is not None or current_index is not None:
+            return self.compare_and_delete(path, is_recursive=True,
+                                           current_index=current_index)
+
         fq_path = self.get_fq_node_path(path)
 
         parameters = { 'dir': 'true', 'recursive': 'true' }
-        return self.__client.send(2, 'delete', fq_path, parameters=parameters)
+        return self.client.send(2, 'delete', fq_path, parameters=parameters)
+
+    def delete_recursive_if_index(self, path, current_index):
+        """Only delete the given directory (and its children) if the node is at 
+        the given index. 
+
+        :param path: Key
+        :type path: string
+
+        :param current_index: Current index to check
+        :type current_index: int or None
+
+        :returns: Response object
+        :rtype: :class:`etcd.response.ResponseV2`
+        """
+
+        return self.compare_and_delete(path, is_recursive=True, 
+                                       current_index=current_index)
+

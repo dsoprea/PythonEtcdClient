@@ -70,22 +70,28 @@ class Client(object):
     server, and provides functions via properties.
 
     :param host: Hostname or IP of server
+    :type host: string
+
     :param port: Port of server
+    :type port: int
+
     :param is_ssl: Whether to use 'http://' or 'https://'.
+    :type is_ssl: bool
+
     :param debug: Whether to print debug verbosity (can be provided as the 
                   ETCD_DEBUG environment variable, as well)
-    :param ssl_do_verify: Whether to verify the certificate hostname.
-    :param ssl_ca_bundle_filepath: A bundle of rootCAs for verifications.
-    :param ssl_client_cert_filepath: A client certificate, for authentication.
-    :param ssl_client_key_filepath: A client key, for authentication.
-
-    :type host: string
-    :type port: int
-    :type is_ssl: bool
     :type debug: bool
+
+    :param ssl_do_verify: Whether to verify the certificate hostname.
     :type ssl_do_verify: bool or None
+
+    :param ssl_ca_bundle_filepath: A bundle of rootCAs for verifications.
     :type ssl_ca_bundle_filepath: string or None
+
+    :param ssl_client_cert_filepath: A client certificate, for authentication.
     :type ssl_client_cert_filepath: string or None
+
+    :param ssl_client_key_filepath: A client key, for authentication.
     :type ssl_client_key_filepath: string or None
 
     :raises: ValueError
@@ -216,27 +222,34 @@ class Client(object):
         """Build and execute a request.
 
         :param version: Version of API
+        :type version: int
+
         :param verb: Verb of request ('get', 'post', etc..)
+        :type verb: string
+
         :param path: URL path
+        :type path: string
+
         :param value: Value to be converted to string and passed as "value" in 
                       the POST data.
+        :type value: scalar or None
+
         :param parameters: Dictionary of values to be passed via URL query.
+        :type parameters: dictionary or None
+
         :param data: Dictionary of values to be passed via POST data.
+        :type data: dictionary or None
+
         :param module: Name of the etcd module that hosts the functionality.
+        :type module: string or None
+
         :param return_raw: Whether to return a 
                            :class:`etcd.response.ResponseV2` object or the raw 
                            Requests response.
+        :type return_raw: bool
+
         :param allow_reconnect: Allow the client to consider alternate hosts if
                                 the current host fails connection.
-
-        :type version: int
-        :type verb: string
-        :type path: string
-        :type value: scalar or None
-        :type parameters: dictionary or None
-        :type data: dictionary or None
-        :type module: string or None
-        :type return_raw: bool
         :type allow_reconnect: bool
 
         :returns: Response object

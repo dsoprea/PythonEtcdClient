@@ -2,6 +2,7 @@ from sys import exit
 from os.path import join
 
 from etcd.client import Client
+from etcd.exceptions import EtcdAlreadyExistsException
 
 #           ssl_ca_bundle_filepath='/home/dustin/development/python/etcd/tests/ssl/rootCA.pem')
 
@@ -9,13 +10,14 @@ from etcd.client import Client
 
 ssl_root = '/home/dustin/development/python/etcd/tests/ssl'
 
-c = Client(host='etcd.local', 
-           is_ssl=True, 
-           ssl_ca_bundle_filepath=join(ssl_root, 'demoCA', 'cacert.pem'),
-           ssl_client_cert_filepath=join(ssl_root, 'client.crt'), 
-           ssl_client_key_filepath=join(ssl_root, 'client.key'))
+c = Client(host='127.0.0.1',#etcd.local', 
+#           is_ssl=True, 
+#           ssl_ca_bundle_filepath=join(ssl_root, 'demoCA', 'cacert.pem'),
+#           ssl_client_cert_filepath=join(ssl_root, 'client.crt'), 
+#           ssl_client_key_filepath=join(ssl_root, 'client.key'),
 #           ssl_client_cert_filepath='/home/dustin/development/python/etcd/tests/ssl/cert_2_newca/alien_client.crt', 
 #           ssl_client_key_filepath='/home/dustin/development/python/etcd/tests/ssl/cert_2_newca/alien_client.key')
+)
 
 #machines = c.server.get_machines()
 #for machine in machines:
@@ -24,6 +26,32 @@ c = Client(host='etcd.local',
 #print
 #
 #exit(0)
+
+try:
+    r = c.directory.create('/dir_test/bb')
+except EtcdAlreadyExistsException:
+    c.directory.delete('/dir_test/bb')
+    r = c.directory.create('/dir_test/bb')
+
+print(r)
+
+#r = c.directory.create('/test_2056/new_dir')#, ttl=60)
+
+r = c.directory.delete_if_index('/dir_test/bb', r.node.modified_index + 999)
+print(r)
+
+exit(0)
+
+r = c.node.set('/node_test/testkey', 'some_existing_value')
+print(r)
+
+#r = c.node.delete_if_value('/node_test/testkey', 'some_existing_value')
+#print(r)
+
+r = c.node.delete_if_index('/node_test/testkey', r.node.modified_index)
+print(r)
+
+exit(0)
 
 r = c.node.set('/node_test/subkey1', 20)
 

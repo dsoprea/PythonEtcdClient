@@ -251,13 +251,10 @@ class _ReentrantLock(_LockBase):
 
 
 class LockMod(CommonOps):
-    def __init__(self, client):
-        self.__client = client
-
     def get_lock(self, lock_name, ttl):
-        return _Lock(self.__client, lock_name, ttl)
+        return _Lock(self.client, lock_name, ttl)
 
     def get_rlock(self, lock_name, instance_value, ttl):
-        return _ReentrantLock(self.__client, lock_name, instance_value, ttl)
+        return _ReentrantLock(self.client, lock_name, instance_value, ttl)
 
 # TODO: Is a lock deleted implicitly after expiration, or is it just somehow deactivated? I tried one key with the index lock, and I subsequently used the same key for a value lock, and I got a 500.

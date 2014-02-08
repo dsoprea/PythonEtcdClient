@@ -13,9 +13,6 @@ class ServerOps(CommonOps):
     :type client: :class:`etcd.client.Client`
     """
 
-    def __init__(self, client):
-        self.__client = client
-
     def __get_get_text(self, reason, path, version=2):
         """Execute a request that will return flat text.
 
@@ -32,13 +29,13 @@ class ServerOps(CommonOps):
         """
 
         if version is not None:
-            url = ('%s/v%d%s' % (self.__client.prefix, version, path))
+            url = ('%s/v%d%s' % (self.client.prefix, version, path))
         else:
-            url = ('%s%s' % (self.__client.prefix, path))
+            url = ('%s%s' % (self.client.prefix, path))
 
-        self.__client.debug("TEXT URL (%s) = [%s]" % (reason, url))
+        self.client.debug("TEXT URL (%s) = [%s]" % (reason, url))
 
-        r = self.__client.session.get(url)
+        r = self.client.session.get(url)
         r.raise_for_status()
 
         return r.text
@@ -78,7 +75,7 @@ class ServerOps(CommonOps):
         """
 
         fq_path = self.get_fq_node_path('/_etcd/machines')
-        response = self.__client.send(2, 'get', fq_path, allow_reconnect=False)
+        response = self.client.send(2, 'get', fq_path, allow_reconnect=False)
 
         for machine in response.node.children:
             yield parse_qsl(machine.value)
@@ -91,4 +88,5 @@ class ServerOps(CommonOps):
         :rtype: string
         """
 
-        return (self.__client.prefix + '/mod/dashboard')
+        return (self.client.prefix + '/mod/dashboard')
+

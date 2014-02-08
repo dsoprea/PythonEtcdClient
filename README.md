@@ -146,8 +146,8 @@ print(r)
 ```
 
 
-Compare and Swap Functions
---------------------------
+Compare and Swap (CAS) Functions
+--------------------------------
 
 These functions represent *etcd*'s atomic comparisons. These allow for a "set"-
 type operation when one or more conditions are met.
@@ -158,8 +158,9 @@ The core call takes one or more of the following conditions as arguments:
     prev_exists
     current_index
 
-If none of the conditions are given, the call acts like a *set()*. If a condition
-is given that fails, a *etcd.exceptions.EtcdPreconditionException* is raised.
+If none of the conditions are given, the call acts like a *set()*. If a 
+condition is given that fails, a *etcd.exceptions.EtcdPreconditionException* is 
+raised.
 
 The core call is:
 
@@ -168,7 +169,7 @@ r = c.node.compare_and_swap('/cas_test/val1', 30, current_value=5,
                             prev_exists=True, current_index=5)
 ```
 
-The following convenience functions are also provided, but only allow you to 
+The following convenience functions are also provided. They only allow you to 
 check one, specific condition:
 
 ```python
@@ -200,7 +201,6 @@ print(r)
 #           [/cas_test/val1] IS_HID=[False] IS_DEL=[False] IS_DIR=[False] 
 #           IS_COLL=[False] TTL=[None] CI=(10) MI=(15)>>
 ```
-
 
 Directory Functions
 -------------------
@@ -251,6 +251,39 @@ print(r)
 #           [/dir_test] IS_HID=[False] IS_DEL=[True] IS_DIR=[True] 
 #           IS_COLL=[False] TTL=[None] CI=(16) MI=(20)>>
 ```
+
+
+Compare and Delete (CAD)
+------------------------
+
+Similar to the "compare and swap" functionality (mentioned above), 
+compare-and-delete functionality (introduced in *etcd 0.3.0*) is also exposed.
+This functionality allows you to delete a node only if its value or index meets
+conditions. Unlike the CAS functionality, CAD functionality is located in the
+node and directory functions.
+
+```python
+r = c.node.delete_if_value('/node_test/testkey', 'some_existing_value')
+
+print(r)
+# Prints: <RESPONSE: <NODE(ResponseV2DeletedNode) [compareAndDelete] 
+#           [/node_test/testkey] IS_HID=[False] IS_DEL=[True] IS_DIR=[False] 
+#           IS_COLL=[False] TTL=[None] CI=(35) MI=(36)>>
+
+r = c.node.delete_if_index('/node_test/testkey2', 22)
+
+print(r)
+# (waiting on bugfixes, to test)
+
+r = c.directory.delete_if_index('/dir_test/testkey2', 22)
+
+print(r)
+# (waiting on bugfixes, to test)
+
+r = c.directory.delete_recursive_if_index('/dir_test/testkey2', 22)
+
+print(r)
+# (waiting on bugfixes, to test)
 
 
 Server Functions
