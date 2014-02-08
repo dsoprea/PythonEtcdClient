@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '2.0.1'
+version = '2.0.2'
 
 setup(name='etcd',
       version=version,

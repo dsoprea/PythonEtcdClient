@@ -9,6 +9,7 @@ etcd/inorder_ops.py
 etcd/node_ops.py
 etcd/response.py
 etcd/server_ops.py
+etcd/stat_ops.py
 etcd.egg-info/PKG-INFO
 etcd.egg-info/SOURCES.txt
 etcd.egg-info/dependency_links.txt
