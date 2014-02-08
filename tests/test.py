@@ -27,6 +27,14 @@ c = Client(host='127.0.0.1',#etcd.local',
 #
 #exit(0)
 
+#s = c.stat.get_leader_stats()
+s = c.stat.get_self_stats()
+
+from pprint import pprint
+pprint(s)
+
+exit(0)
+
 r = c.node.set('/node_test/testkey', 'some_existing_value')
 print(r.node)
 print(r.prev_node)

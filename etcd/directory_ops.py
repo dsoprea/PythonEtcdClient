@@ -6,8 +6,7 @@ from etcd.common_ops import CommonOps
 
 
 class DirectoryOps(CommonOps):
-    """Functions specific to directory management.
-    """
+    """Functions specific to directory management."""
 
     def create(self, path, ttl=None):
         """A normal node-set will implicitly create directories on the way to 

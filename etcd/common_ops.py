@@ -14,6 +14,33 @@ class CommonOps(object):
     def __init__(self, client):
         self.client = client
 
+    def get_text(self, reason, path, version=2):
+        """Execute a request that will return flat text.
+
+        :param reason: Brief phrase describing the request
+        :param path: URL path
+        :param version: API version
+
+        :type reason: string
+        :type path: string
+        :type version: int
+
+        :returns: Response text
+        :rtype: string
+        """
+
+        if version is not None:
+            url = ('%s/v%d%s' % (self.client.prefix, version, path))
+        else:
+            url = ('%s%s' % (self.client.prefix, path))
+
+        self.client.debug("TEXT URL (%s) = [%s]" % (reason, url))
+
+        r = self.client.session.get(url)
+        r.raise_for_status()
+
+        return r.text
+
     def validate_path(self, path):
         """Validate the key that we were given.
 

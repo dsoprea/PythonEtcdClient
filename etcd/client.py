@@ -11,6 +11,7 @@ from etcd.config import HOST_FAIL_WAIT_S
 from etcd.directory_ops import DirectoryOps
 from etcd.node_ops import NodeOps
 from etcd.server_ops import ServerOps
+from etcd.stat_ops import StatOps
 from etcd.inorder_ops import InOrderOps
 from etcd.modules.lock import LockMod
 from etcd.modules.leader import LeaderMod
@@ -386,6 +387,19 @@ class Client(object):
         except AttributeError:
             self.__server = ServerOps(self)
             return self.__server
+
+    @property
+    def stat(self):
+        """Return an instance of the class having the stat functionality.
+
+        :rtype: :class:`etcd.stat_ops.StatOps`
+        """
+
+        try:
+            return self.__stat
+        except AttributeError:
+            self.__stat = StatOps(self)
+            return self.__stat
 
     @property
     def inorder(self):

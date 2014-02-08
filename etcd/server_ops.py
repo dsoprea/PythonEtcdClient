@@ -7,38 +7,7 @@ from etcd.response import ResponseV2
 
 
 class ServerOps(CommonOps):
-    """Functions that query the server for cluster-level information.
-
-    :param client: Client instance
-    :type client: :class:`etcd.client.Client`
-    """
-
-    def __get_get_text(self, reason, path, version=2):
-        """Execute a request that will return flat text.
-
-        :param reason: Brief phrase describing the request
-        :param path: URL path
-        :param version: API version
-
-        :type reason: string
-        :type path: string
-        :type version: int
-
-        :returns: Response text
-        :rtype: string
-        """
-
-        if version is not None:
-            url = ('%s/v%d%s' % (self.client.prefix, version, path))
-        else:
-            url = ('%s%s' % (self.client.prefix, path))
-
-        self.client.debug("TEXT URL (%s) = [%s]" % (reason, url))
-
-        r = self.client.session.get(url)
-        r.raise_for_status()
-
-        return r.text
+    """Functions that query the server for cluster-level information."""
 
     def get_version(self):
         """Return a string representing the version of the server that we're 
@@ -48,7 +17,7 @@ class ServerOps(CommonOps):
         :rtype: string
         """
 
-        version_string = self.__get_get_text('version', '/version', version=None)
+        version_string = self.get_text('version', '/version', version=None)
 
         # Version should look like "etcd v0.2.0".
         prefix = 'etcd v'
@@ -65,7 +34,7 @@ class ServerOps(CommonOps):
         :rtype: string
         """
 
-        return self.__get_get_text('leader', '/leader')
+        return self.get_text('leader', '/leader')
 
     def get_machines(self):
         """Return the list of servers in the cluster represented as nodes.

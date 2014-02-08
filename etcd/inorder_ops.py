@@ -47,11 +47,7 @@ class _InOrder(object):
 
 
 class InOrderOps(CommonOps):
-    """The functions having to do with in-order keys.
-
-    :param client: Client instance
-    :type client: :class:`etcd.client.Client`
-    """
+    """The functions having to do with in-order keys."""
 
     def get_inorder(self, path):
         """Get an instance of the in-order directory class for a specific key.
