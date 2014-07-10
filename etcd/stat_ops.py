@@ -109,7 +109,7 @@ class StatOps(CommonOps):
         return S(leader_info=leader_info, name=data['name'], 
                  recv_append_request_cnt=data['recvAppendRequestCnt'],
                  send_append_request_cnt=data['sendAppendRequestCnt'],
-                 send_bandwidth_rate=data['sendBandwidthRate'],
-                 send_pkg_rate=data['sendPkgRate'], 
+                 send_bandwidth_rate=data.get('sendBandwidthRate'),
+                 send_pkg_rate=data.get('sendPkgRate'), 
                  start_time=start_time, state=data['state'])
 
