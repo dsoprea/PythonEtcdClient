@@ -1,9 +1,8 @@
 import requests
 
-from urlparse import parse_qsl
-
 from etcd.common_ops import CommonOps
 from etcd.response import ResponseV2 
+from etcd.compat import parse_qsl
 
 
 class ServerOps(CommonOps):

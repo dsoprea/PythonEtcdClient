@@ -1,7 +1,6 @@
 import requests
 import re
 
-from urlparse import parse_qsl
 from collections import namedtuple
 from datetime import timedelta, datetime
 

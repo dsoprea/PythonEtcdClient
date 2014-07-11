@@ -51,7 +51,7 @@ class CommonOps(object):
         """
 
         if path[0] != '/':
-            raise ValueError("Path [%s] should've been absolute." % (path))
+            raise ValueError("Path [%s] should've been absolute." % (path,))
 
     def get_fq_node_path(self, path):
         """Return the full path of the given key.

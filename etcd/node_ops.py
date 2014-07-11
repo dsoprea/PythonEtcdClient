@@ -210,13 +210,15 @@ class NodeOps(CommonOps):
             data['ttl'] = ttl
 
         try:
-            return self.client.send(2, 'put', fq_path, value, data=data, 
-                                    parameters=parameters)
+            result = self.client.send(2, 'put', fq_path, value, data=data, 
+                                      parameters=parameters)
         except HTTPError as e:
             if e.response.status_code == codes.precondition_failed:
                 raise EtcdPreconditionException()
 
             raise
+
+        return result
 
     def create_only(self, path, value, ttl=None):
         """A convenience function that will only set a node if it doesn't 

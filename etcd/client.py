@@ -18,6 +18,8 @@ from etcd.modules.lock import LockMod
 from etcd.modules.leader import LeaderMod
 from etcd.response import ResponseV2
 
+logging.getLogger('requests.packages.urllib3').setLevel(logging.WARN)
+
 _logger = logging.getLogger(__name__)
 
 _SSL_DO_VERIFY = bool(int(environ.get('PEC_SSL_DO_VERIFY', '1')))
@@ -155,6 +157,8 @@ class Client(object):
         _logger.debug("PREFIX= [%s]", self.__prefix)
 
         self.__session = requests.Session()
+
+        # Define an adapter for when SSL is requested.
         self.__session.mount('https://', _Ssl3HttpAdapter())
 
 # TODO: Remove the version check after debugging.
