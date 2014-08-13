@@ -13,6 +13,8 @@ class DirectoryOps(CommonOps):
         setting a value. This call exists for when you'd like to -explicitly- 
         create one.
 
+        We implicitly fail if the directory already exists.
+
         :param path: Key
         :type path: string
 

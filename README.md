@@ -17,7 +17,7 @@ Quick Start
 There's almost nothing to it:
 
 ```python
-from etcd import Client
+from etcd.client import Client
 
 # Uses the default *etcd* port on *localhost* unless told differently.
 c = Client()
