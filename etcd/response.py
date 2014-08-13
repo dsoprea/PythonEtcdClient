@@ -162,9 +162,9 @@ class ResponseV2AliveDirectoryNode(ResponseV2DirectoryNode):
     """
 
     def initialize(self, node):
-        if 'nodes' in node:
+        if node.get('dir', False) is True:
             self.__is_collection = True
-            self.__raw_nodes = node['nodes']
+            self.__raw_nodes = node.get('nodes', [])
         else:
             self.__is_collection = False
             self.__raw_nodes = None
