@@ -15,6 +15,16 @@ class _InOrder(object):
         self.client = client
         self.__fq_path = fq_path
 
+# TODO(dustin): Do a directory-create.
+#
+#    def create(self):
+#        """Explicitly create the directory. Not usually necessary.
+#        :returns: Response object
+#        :rtype: :class:`etcd.response.ResponseV2`
+#        """
+#
+#        return self.
+
     def add(self, value):
         """Add an in-order value.
 
