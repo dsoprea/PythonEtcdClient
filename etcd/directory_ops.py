@@ -100,7 +100,7 @@ class DirectoryOps(CommonOps):
         :rtype: :class:`etcd.response.ResponseV2`
         """
 
-        if current_value is not None or current_index is not None:
+        if current_index is not None:
             return self.compare_and_delete(path, is_recursive=True,
                                            current_index=current_index)
 
