@@ -3,37 +3,12 @@ import logging
 from requests.exceptions import HTTPError
 from requests.status_codes import codes
 
-from etcd.exceptions import EtcdPreconditionException
+from etcd.exceptions import EtcdPreconditionException, translate_exceptions
 from etcd.common_ops import CommonOps
 from etcd.response import ResponseV2 
 
 _logger = logging.getLogger(__name__)
 
-def translate_exceptions(method):
-   def op_wrapper(self, path, *args, **kwargs):
-        try:
-            return method(self, path, *args, **kwargs)
-        except HTTPError as e:
-            # We're only concerned with generating KeyError's when appropriate.
-
-            if e.response.status_code == codes.precondition_failed:
-                r = EtcdPreconditionException()
-            elif e.response.status_code == codes.not_found:
-                try:
-                    j = e.response.json()
-                except ValueError:
-                    raise
-
-                if j['errorCode'] != 100:
-                    raise
-
-                r = KeyError(path)
-            else:
-                raise
-
-        raise r
-
-   return op_wrapper
 
 class NodeOps(CommonOps):
     """Common key-value functions."""
