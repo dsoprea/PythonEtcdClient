@@ -1,18 +1,17 @@
 Metadata-Version: 1.1
 Name: etcd
-Version: 2.0.2
+Version: 2.0.3
 Summary: A Python etcd client that just works.
 Home-page: https://github.com/dsoprea/PythonEtcdClient
 Author: Dustin Oprea
 Author-email: myselfasunder@gmail.com
 License: GPL 2
 Description: A Python etcd client that just works.
-Keywords: etcd
+Keywords: etcd kv
 Platform: UNKNOWN
 Classifier: Intended Audience :: Developers
 Classifier: License :: OSI Approved :: GNU General Public License v2 (GPLv2)
 Classifier: Operating System :: POSIX :: Linux
-Classifier: Programming Language :: Python :: 2.7
 Classifier: Topic :: Database :: Front-Ends
 Classifier: Topic :: Software Development :: Libraries :: Python Modules
 Classifier: Topic :: System :: Distributed Computing

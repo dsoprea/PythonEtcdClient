@@ -5,4 +5,5 @@
 /dist
 /local
 *.pyc
-
+/etcd.egg-info
+/build
