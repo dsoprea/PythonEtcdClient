@@ -1,4 +1,5 @@
 import pytz
+import simplejson
 
 from collections import namedtuple
 from os.path import basename
@@ -31,6 +32,10 @@ def _build_node_object(action, node):
 # TODO: Specifically, what actions can happen for a non-directory?
         else:
             return ResponseV2AliveNode(action, node)
+
+
+class EmptyResponseError(Exception):
+    pass
 
 
 class ResponseV2BasicNode(object):
@@ -221,7 +226,14 @@ class ResponseV2(object):
     """
 
     def __init__(self, response, request_verb, request_path):
-        response_raw = response.json()
+        try:
+            response_raw = response.json()
+        except simplejson.JSONDecodeError:
+            # Bug #1120: Wait will timeout with a JSON-message of zero-length.
+            if response.text == '':
+                raise EmptyResponseError()
+            else:
+                raise
 
         self.node = _build_node_object(response_raw['action'], 
                                        response_raw['node'])
