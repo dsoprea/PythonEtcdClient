@@ -1,9 +1,10 @@
 import logging
 
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, ChunkedEncodingError
 from requests.status_codes import codes
 
-from etcd.exceptions import EtcdPreconditionException, translate_exceptions
+from etcd.exceptions import EtcdPreconditionException, translate_exceptions, \
+                            EtcdEmptyResponseError
 from etcd.common_ops import CommonOps
 from etcd.response import ResponseV2 
 
@@ -14,15 +15,11 @@ class NodeOps(CommonOps):
     """Common key-value functions."""
 
     @translate_exceptions
-    def get(self, path, recursive=False):
+    def get(self, path):
         """Get the given node.
 
         :param path: Node key
         :type path: string
-
-        :param recursive: Node is a directory, and we want to read it 
-                          recursively.
-        :type recursive: bool
 
         :returns: Response object
         :rtype: :class:`etcd.response.ResponseV2`
@@ -31,13 +28,7 @@ class NodeOps(CommonOps):
         """
 
         fq_path = self.get_fq_node_path(path)
-
-        parameters = { }
-
-        if recursive is True:
-            parameters['recursive'] = 'true'
-
-        return self.client.send(2, 'get', fq_path, parameters=parameters)
+        return self.client.send(2, 'get', fq_path)
 
     @translate_exceptions
     def set(self, path, value, ttl=None):
@@ -63,32 +54,6 @@ class NodeOps(CommonOps):
             data['ttl'] = ttl
 
         return self.client.send(2, 'put', fq_path, value, data=data)
-
-    @translate_exceptions
-    def wait(self, path, recursive=False):
-        """Long-poll on the given path until it changes.
-
-        :param path: Node key
-        :type path: string
-
-        :param recursive: Wait on any change in the given directory or any of 
-                          its descendants.
-        :type recursive: bool
-
-        :returns: Response object
-        :rtype: :class:`etcd.response.ResponseV2`
-
-        :raises: KeyError
-        """
-
-        fq_path = self.get_fq_node_path(path)
-
-        parameters = { 'wait': 'true' }
-
-        if recursive is True:
-            parameters['recursive'] = 'true'
-
-        return self.client.send(2, 'get', fq_path, parameters=parameters)
 
     @translate_exceptions
     def delete(self, path, current_value=None, current_index=None):
@@ -292,3 +257,7 @@ class NodeOps(CommonOps):
 
         # This will have a return "action" of "compareAndSwap".
         return self.compare_and_swap(path, value, current_value=current_value, ttl=ttl)
+
+    @translate_exceptions
+    def wait(self, path):
+        return super(NodeOps, self).wait(path)

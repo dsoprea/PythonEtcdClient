@@ -1,7 +1,8 @@
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, ChunkedEncodingError
 from requests.status_codes import codes
 
-from etcd.exceptions import EtcdPreconditionException
+from etcd.exceptions import EtcdPreconditionException, EtcdEmptyResponseError,\
+                            EtcdWaitFaultException, translate_exceptions
 
 
 class CommonOps(object):
@@ -119,3 +120,31 @@ class CommonOps(object):
 
             raise
 
+    @translate_exceptions
+    def wait(self, path, recursive=False):
+        """Long-poll on the given path until it changes.
+
+        :param path: Node key
+        :type path: string
+
+        :param recursive: Wait on any change in the given directory or any of 
+                          its descendants.
+        :type recursive: bool
+
+        :returns: Response object
+        :rtype: :class:`etcd.response.ResponseV2` or None
+
+        :raises: KeyError
+        """
+
+        fq_path = self.get_fq_node_path(path)
+
+        parameters = { 'wait': 'true' }
+
+        if recursive is True:
+            parameters['recursive'] = 'true'
+
+        try:
+            return self.client.send(2, 'get', fq_path, parameters=parameters)
+        except ChunkedEncodingError, EtcdEmptyResponseError:
+            raise EtcdWaitFaultException()

@@ -7,6 +7,8 @@ from etcd.common_ops import CommonOps
 # TODO(dustin): We may need a directory-specific version of 
 #               translate_exceptions. We'll see.
 
+# TODO(dustin): We need a 
+
 
 class DirectoryOps(CommonOps):
     """Functions specific to directory management."""
@@ -116,7 +118,6 @@ class DirectoryOps(CommonOps):
         parameters = { 'dir': 'true', 'recursive': 'true' }
         return self.client.send(2, 'delete', fq_path, parameters=parameters)
 
-
     @translate_exceptions
     def delete_recursive_if_index(self, path, current_index):
         """Only delete the given directory (and its children) if the node is at 
@@ -134,4 +135,4 @@ class DirectoryOps(CommonOps):
 
         return self.compare_and_delete(path, is_recursive=True, 
                                        current_index=current_index)
-
+        

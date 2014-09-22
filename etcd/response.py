@@ -1,6 +1,8 @@
 import pytz
 import simplejson
 
+import etcd.exceptions
+
 from collections import namedtuple
 from os.path import basename
 from pytz import timezone
@@ -32,10 +34,6 @@ def _build_node_object(action, node):
 # TODO: Specifically, what actions can happen for a non-directory?
         else:
             return ResponseV2AliveNode(action, node)
-
-
-class EmptyResponseError(Exception):
-    pass
 
 
 class ResponseV2BasicNode(object):
@@ -231,7 +229,7 @@ class ResponseV2(object):
         except simplejson.JSONDecodeError:
             # Bug #1120: Wait will timeout with a JSON-message of zero-length.
             if response.text == '':
-                raise EmptyResponseError()
+                raise etcd.exceptions.EtcdEmptyResponseError()
             else:
                 raise
 
