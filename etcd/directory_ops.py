@@ -7,11 +7,37 @@ from etcd.common_ops import CommonOps
 # TODO(dustin): We may need a directory-specific version of 
 #               translate_exceptions. We'll see.
 
-# TODO(dustin): We need a 
-
 
 class DirectoryOps(CommonOps):
     """Functions specific to directory management."""
+
+    @translate_exceptions
+    def list(self, recursive=False, force_consistent=False, force_quorum=False):
+        """Return a list of the nodes.
+
+        :param recursive: Return all children, and children-of-children.
+        :type recursive: bool
+
+        :param force_consistent: Only interact with the current leader so 
+                                 propagation is not a concern.
+        :type force_consistent: bool
+
+        :returns: Response object
+        :rtype: :class:`etcd.response.ResponseV2`
+        """
+
+        parameters = {}
+        if recursive is True:
+            parameters['recursive'] = 'true'
+
+        if force_consistent is True:
+            parameters['consistent'] = 'true'
+
+        if force_quorum is True:
+            parameters['quorum'] = 'true'
+
+        return self.client.send(2, 'get', self.__fq_path, 
+                                parameters=parameters)
 
     @translate_exceptions
     def create(self, path, ttl=None):

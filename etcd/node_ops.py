@@ -3,8 +3,10 @@ import logging
 from requests.exceptions import HTTPError, ChunkedEncodingError
 from requests.status_codes import codes
 
-from etcd.exceptions import EtcdPreconditionException, translate_exceptions, \
-                            EtcdEmptyResponseError
+import etcd.config
+
+from etcd.exceptions import EtcdPreconditionException, EtcdAtomicWriteError, \
+                            translate_exceptions
 from etcd.common_ops import CommonOps
 from etcd.response import ResponseV2 
 
@@ -15,11 +17,15 @@ class NodeOps(CommonOps):
     """Common key-value functions."""
 
     @translate_exceptions
-    def get(self, path):
+    def get(self, path, force_consistent=False, force_quorum=False):
         """Get the given node.
 
         :param path: Node key
         :type path: string
+
+        :param force_consistent: Only interact with the current leader so 
+                                 propagation is not a concern.
+        :type force_consistent: bool
 
         :returns: Response object
         :rtype: :class:`etcd.response.ResponseV2`
@@ -27,8 +33,15 @@ class NodeOps(CommonOps):
         :raises: KeyError
         """
 
+        parameters = {}
+        if force_consistent is True:
+            parameters['consistent'] = 'true'
+
+        if force_quorum is True:
+            parameters['quorum'] = 'true'
+
         fq_path = self.get_fq_node_path(path)
-        return self.client.send(2, 'get', fq_path)
+        return self.client.send(2, 'get', fq_path, parameters=parameters)
 
     @translate_exceptions
     def set(self, path, value, ttl=None):
@@ -261,3 +274,35 @@ class NodeOps(CommonOps):
     @translate_exceptions
     def wait(self, path):
         return super(NodeOps, self).wait(path)
+
+    @translate_exceptions
+    def atomic_update(self, path, update_value_cb,
+                      max_attempts=etcd.config.ATOMIC_MAX_ATTEMPTS, ttl=None):
+        """Retrieve the value for the given path, pass it to the callback, get 
+        an update value back, and try updating. Loop until the update can be 
+        performed atomically.
+
+        :param path: Node key
+        :type path: string
+
+        :param update_value_cb: Callback
+        :type update_value_cb: callback
+        """
+
+        i = max_attempts
+        while i > 0:
+            response = self.get(path)
+            value = update_value_cb(response.node.value)
+
+            try:
+                return self.update_if_index(
+                        path, 
+                        value, 
+                        response.node.modified_index, 
+                        ttl=ttl)
+            except EtcdPreconditionException:
+                pass
+
+            i -= 1
+
+        raise EtcdAtomicWriteError("Atomic update failed (%d): %s" % (i, path))

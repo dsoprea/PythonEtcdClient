@@ -33,6 +33,11 @@ class EtcdEmptyResponseError(EtcdError):
 class EtcdWaitFaultException(EtcdException):
     pass
 
+
+class EtcdAtomicWriteError(EtcdError):
+    pass
+
+
 def translate_exceptions(method):
    def op_wrapper(self, path, *args, **kwargs):
         try:

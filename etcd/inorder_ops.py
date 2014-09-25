@@ -15,15 +15,24 @@ class _InOrder(object):
         self.client = client
         self.__fq_path = fq_path
 
-# TODO(dustin): Do a directory-create.
-#
-#    def create(self):
-#        """Explicitly create the directory. Not usually necessary.
-#        :returns: Response object
-#        :rtype: :class:`etcd.response.ResponseV2`
-#        """
-#
-#        return self.
+    def create(self):
+        """Explicitly create the directory. Not usually necessary.
+        :returns: Response object
+        :rtype: :class:`etcd.response.ResponseV2`
+        """
+
+        return self.client.directory.create(self.__fq_path)
+
+    def delete(self):
+        """Delete the directory.
+        :returns: Response object
+        :rtype: :class:`etcd.response.ResponseV2`
+        """
+
+        return self.client.directory.delete_recursive(self.__fq_path)
+
+    def pop(self, name):
+        self.client.node.delete(self.__fq_path + '/' + name)
 
     def add(self, value):
         """Add an in-order value.
@@ -38,7 +47,7 @@ class _InOrder(object):
 # TODO: Can we send a TTL?
         return self.client.send(2, 'post', self.__fq_path, value=value)
 
-    def list(self, sorted=True):
+    def list(self, sorted=False):
         """Return a list of the inserted nodes.
 
         :param sorted: Return nodes in the proper, chronological order.
