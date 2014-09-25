@@ -13,7 +13,7 @@ class CommonOps(object):
     """
 
     def __init__(self, client):
-        self.client = client
+        self.__client = client
 
     def get_text(self, reason, path, version=2):
         """Execute a request that will return flat text.
@@ -146,5 +146,19 @@ class CommonOps(object):
 
         try:
             return self.client.send(2, 'get', fq_path, parameters=parameters)
-        except ChunkedEncodingError, EtcdEmptyResponseError:
-            raise EtcdWaitFaultException()
+        except ChunkedEncodingError:
+# TODO(dustin): We need to document why we would get this. We don't remember 
+#               the context.
+            pass
+        except EtcdEmptyResponseError:
+# TODO(dustin): This will happen when we timeout, and should be considered a 
+#               bug as it does not constitute valid JSON.
+#
+#               https://github.com/coreos/etcd/issues/1120
+            pass
+
+        raise EtcdWaitFaultException()
+
+    @property
+    def client(self):
+        return self.__client
