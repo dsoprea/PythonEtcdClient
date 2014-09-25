@@ -1,7 +1,7 @@
 from etcd.common_ops import CommonOps
 
 
-class _InOrder(object):
+class _InOrder(CommonOps):
     """Represents an in-order directory at a specific path.
 
     :param client: Instance of client
@@ -11,9 +11,10 @@ class _InOrder(object):
     :type fq_path: string
     """
 
-    def __init__(self, client, fq_path):
-        self.client = client
-        self.__fq_path = fq_path
+    def __init__(self, path, *args, **kwargs):
+        super(_InOrder, self).__init__(*args, **kwargs)
+
+        self.__path = path
 
     def create(self):
         """Explicitly create the directory. Not usually necessary.
@@ -21,7 +22,7 @@ class _InOrder(object):
         :rtype: :class:`etcd.response.ResponseV2`
         """
 
-        return self.client.directory.create(self.__fq_path)
+        return self.client.directory.create(self.__path)
 
     def delete(self):
         """Delete the directory.
@@ -29,10 +30,10 @@ class _InOrder(object):
         :rtype: :class:`etcd.response.ResponseV2`
         """
 
-        return self.client.directory.delete_recursive(self.__fq_path)
+        return self.client.directory.delete_recursive(self.__path)
 
     def pop(self, name):
-        self.client.node.delete(self.__fq_path + '/' + name)
+        self.client.node.delete(self.__path + '/' + name)
 
     def add(self, value):
         """Add an in-order value.
@@ -45,7 +46,9 @@ class _InOrder(object):
         """
 
 # TODO: Can we send a TTL?
-        return self.client.send(2, 'post', self.__fq_path, value=value)
+
+        fq_path = self.get_fq_node_path(self.__path)
+        return self.client.send(2, 'post', fq_path, value=value)
 
     def list(self, sorted=False):
         """Return a list of the inserted nodes.
@@ -61,8 +64,7 @@ class _InOrder(object):
         if sorted is True:
             parameters['sorted'] = 'true'
 
-        return self.client.send(2, 'get', self.__fq_path, 
-                                parameters=parameters)
+        return self.client.send(2, 'get', self.__path, parameters=parameters)
 
 
 class InOrderOps(CommonOps):
@@ -78,5 +80,4 @@ class InOrderOps(CommonOps):
         :rtype: :class:`etcd.inorder_ops._InOrder`
         """
 
-        fq_path = self.get_fq_node_path(path)
-        return _InOrder(self.client, fq_path)
+        return _InOrder(path, self.client)

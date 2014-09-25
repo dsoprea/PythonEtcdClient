@@ -12,7 +12,7 @@ class DirectoryOps(CommonOps):
     """Functions specific to directory management."""
 
     @translate_exceptions
-    def list(self, recursive=False, force_consistent=False, force_quorum=False):
+    def list(self, path, recursive=False, force_consistent=False, force_quorum=False):
         """Return a list of the nodes.
 
         :param recursive: Return all children, and children-of-children.
@@ -26,6 +26,8 @@ class DirectoryOps(CommonOps):
         :rtype: :class:`etcd.response.ResponseV2`
         """
 
+        fq_path = self.get_fq_node_path(path)
+
         parameters = {}
         if recursive is True:
             parameters['recursive'] = 'true'
@@ -36,8 +38,7 @@ class DirectoryOps(CommonOps):
         if force_quorum is True:
             parameters['quorum'] = 'true'
 
-        return self.client.send(2, 'get', self.__fq_path, 
-                                parameters=parameters)
+        return self.client.send(2, 'get', fq_path, parameters=parameters)
 
     @translate_exceptions
     def create(self, path, ttl=None):
@@ -161,4 +162,3 @@ class DirectoryOps(CommonOps):
 
         return self.compare_and_delete(path, is_recursive=True, 
                                        current_index=current_index)
-        
