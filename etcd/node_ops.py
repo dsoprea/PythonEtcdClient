@@ -272,8 +272,8 @@ class NodeOps(CommonOps):
         return self.compare_and_swap(path, value, current_value=current_value, ttl=ttl)
 
     @translate_exceptions
-    def wait(self, path):
-        return super(NodeOps, self).wait(path)
+    def wait(self, path, force_consistent=False):
+        return super(NodeOps, self).wait(path, force_consistent=force_consistent)
 
     @translate_exceptions
     def atomic_update(self, path, update_value_cb,

@@ -121,7 +121,7 @@ class CommonOps(object):
             raise
 
     @translate_exceptions
-    def wait(self, path, recursive=False):
+    def wait(self, path, recursive=False, force_consistent=False):
         """Long-poll on the given path until it changes.
 
         :param path: Node key
@@ -143,6 +143,9 @@ class CommonOps(object):
 
         if recursive is True:
             parameters['recursive'] = 'true'
+
+        if force_consistent is True:
+            parameters['consistent'] = 'true'
 
         try:
             return self.client.send(2, 'get', fq_path, parameters=parameters)
